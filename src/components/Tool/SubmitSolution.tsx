@@ -9,7 +9,7 @@ export default function SubmitSolution() {
   const [error, setError] = useState<boolean | null>(null);
 
   const handleSubmit = () => {
-    const isCorrect = Boolean(choosenTrainingId && compareValue(outputSolution, trainingSolution?.[choosenTrainingId].at(0) || []));
+    const isCorrect = Boolean(choosenTrainingId && compareValue(outputSolution, trainingSolution?.[choosenTrainingId] || []));
     setError(isCorrect);
   } 
 

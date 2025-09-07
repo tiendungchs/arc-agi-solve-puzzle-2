@@ -1,20 +1,16 @@
 import { Box } from "@mui/material";
-import ResizeInput from "./ResizeInput";
+import ResizeInput from "./ResizeOutput";
 import EditOutputGridCell from "./EditOutputGridCell";
-import SubmitSolution from "./SubmitSolution";
 
 
-export default function Tool() {
+export default function Tool({ matrixIndex }: { matrixIndex: number }) {
   return (
     <Box>
       <Box marginBottom={2}>
-        <ResizeInput />
+        <ResizeInput matrixIndex={matrixIndex} />
       </Box>
       <Box marginBottom={2}>
-        <EditOutputGridCell />
-      </Box>
-      <Box marginBottom={2}>
-        <SubmitSolution />
+        <EditOutputGridCell matrixIndex={matrixIndex} />
       </Box>
     </Box>
   );

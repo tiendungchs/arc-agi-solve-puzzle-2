@@ -5,7 +5,7 @@ import { AppContext, type AppContextProps } from "../Context/AppContext";
 import type { FillStep } from "../../types/step";
 
 
-export default function EditOutputGridCell() {
+export default function EditOutputGridCell({ matrixIndex }: { matrixIndex: number }) {
 
   const { selectedCell, handleChangeSelectedCell, handleChangeOutputSolution, outputSolution, step, setStep } = useContext<AppContextProps>(AppContext);
   
@@ -15,11 +15,12 @@ export default function EditOutputGridCell() {
       if (source === "output") {
         for (let i = x; i < x + sx; i++) {
           for (let j = y; j < y + sy; j++) {
-            outputSolution[j][i] = index;
+            outputSolution[matrixIndex][j][i] = index;
           }
         }
         const newStep: FillStep = {
           action: 'fill',
+          matrixIndex: matrixIndex,
           options: {
             position: { x, y },
             size: { width: sx, height: sy },

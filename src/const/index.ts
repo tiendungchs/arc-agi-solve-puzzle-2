@@ -32,13 +32,13 @@ export const INDEX_MAP: Record<string, DIGIT> = {
     "#fabebe": 9,
 }
 
-export const DEFAULT_SOLUTION: Array<Array<DIGIT>> = [
+export const DEFAULT_SOLUTION_MATRIX: Array<Array<DIGIT>> = [
   ["-1", "-1", "-1"],
   ["-1", "-1", "-1"],
-  ["-1", "-1", "-1"], 
+  ["-1", "-1", "-1"]
 ]
 
 export const DEFAULT_SELECTED_CELL: SelectedCell = {
   mode: "edit",
   color: 0 as DIGIT
-}
+} 

@@ -7,6 +7,7 @@ export type SelectedCell = {
     x: number,
     y: number,
     source: 'input' | 'output',
+    matrixIndex: number,
     sx: number,
     sy: number,
     isCopy: boolean

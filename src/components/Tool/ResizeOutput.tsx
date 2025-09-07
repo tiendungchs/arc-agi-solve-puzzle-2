@@ -1,15 +1,15 @@
 import { Box, Button, TextField, Typography } from "@mui/material";
 import { useContext, useState } from "react";
 import { AppContext, type AppContextProps } from "../Context/AppContext";
-import { DEFAULT_SOLUTION, type DIGIT } from "../../const";
+import { DEFAULT_SOLUTION_MATRIX, type DIGIT } from "../../const";
 import { cloneDeep } from "lodash";
 import type { ClearStep, CopyStep, ResizeStep } from "../../types/step";
 
 
-export default function ResizeInput() {
+export default function ResizeInput({ matrixIndex }: { matrixIndex: number }) {
   const { outputSolution, handleChangeOutputSolution, inputSolution, setStep, step } = useContext<AppContextProps>(AppContext);
-  const rows = outputSolution.length;
-  const cols = outputSolution[0].length;
+  const rows = outputSolution[matrixIndex].length;
+  const cols = outputSolution[matrixIndex][0].length;
   const [size, setSize] = useState<string>(`${cols}x${rows}`);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,22 +27,25 @@ export default function ResizeInput() {
       setError(null);
     }
 
-    const newOutput: Array<Array<DIGIT>> = Array.from({ length: newRows }, (_, _i) => Array.from({ length: newCols }, (_, _j) => "-1" as DIGIT ));
-    const oldRows = outputSolution.length;
-    const oldCols = outputSolution[0].length;
+    const newOutputMatrix: Array<Array<DIGIT>> = Array.from({ length: newRows }, (_, _i) => Array.from({ length: newCols }, (_, _j) => "-1" as DIGIT ));
+    const oldRows = outputSolution[matrixIndex].length;
+    const oldCols = outputSolution[matrixIndex][0].length;
 
     const minRows = Math.min(oldRows, newRows);
     const minCols = Math.min(oldCols, newCols);
 
     for (let i = 0; i < minRows; i++) {
       for (let j = 0; j < minCols; j++) {
-        newOutput[i][j] = outputSolution[i][j];
+        newOutputMatrix[i][j] = outputSolution[matrixIndex][i][j];
       }
     }
+    const newOutput = cloneDeep(outputSolution);
+    newOutput[matrixIndex] = newOutputMatrix;
 
     handleChangeOutputSolution(newOutput);
     const newStep: ResizeStep = {
       action: 'resize',
+      matrixIndex,
       options: {
         size: { width: newCols, height: newRows },
       },
@@ -54,20 +57,25 @@ export default function ResizeInput() {
   const handleCopyFromInput = () => {
     // Implement copy from input logic
     if (inputSolution) {
-      const newOutput = cloneDeep(inputSolution);
+      const newOutputMatrix = cloneDeep(inputSolution[matrixIndex]);
+      const newOutput = cloneDeep(outputSolution);
+      newOutput[matrixIndex] = newOutputMatrix;
+      // Create a copy step
       const newStep: CopyStep = {
         action: 'copy',
         options: {
           from: {
             source: 'input',
+            matrixIndex: matrixIndex,
             position: { x: 0, y: 0 },
-            size: { width: newOutput[0].length, height: newOutput.length },
+            size: { width: newOutputMatrix[0].length, height: newOutputMatrix.length },
           },
           to: {
+            matrixIndex: matrixIndex,
             position: { x: 0, y: 0 }
           }
         },
-        newOutput
+        newOutput 
       };
       handleChangeOutputSolution(newOutput);
       setStep([...step, newStep]);
@@ -76,9 +84,12 @@ export default function ResizeInput() {
   }
 
   const handleClear = () => {
-    const newOutput: Array<Array<DIGIT>> = Array.from({ length: rows }, (_, _i) => Array.from({ length: cols }, (_, _j) => "-1" as DIGIT ));
+    const newOutputMatrix: Array<Array<DIGIT>> = Array.from({ length: rows }, (_, _i) => Array.from({ length: cols }, (_, _j) => "-1" as DIGIT ));
+    const newOutput = cloneDeep(outputSolution);
+    newOutput[matrixIndex] = newOutputMatrix;
     const newStep: ClearStep = {
       action: 'clear',
+      matrixIndex,
       options: {
         size: { width: cols, height: rows },
       },
@@ -89,7 +100,9 @@ export default function ResizeInput() {
   }
 
   const handleReset = () => {
-    handleChangeOutputSolution(DEFAULT_SOLUTION);
+    const newOutputSolution = cloneDeep(outputSolution);
+    newOutputSolution[matrixIndex] = cloneDeep(DEFAULT_SOLUTION_MATRIX);
+    handleChangeOutputSolution(newOutputSolution);
     setStep([]);
   }
 
