@@ -6,13 +6,12 @@ import type { Position } from "../../types/position";
 import { isBetweenPosition } from "../../utils/isBetween";
 
 export type SolutionInputProps = {
-  input: Array<Array<DIGIT>>,
-  inputIndex: number
+  input: Array<Array<DIGIT>>
 }
 
-export default function SolutionInput({ input, inputIndex }: SolutionInputProps) {
+export default function SolutionInput({ input }: SolutionInputProps) {
 
-  const { selectedCell, handleChangeSelectedCell } = useContext<AppContextProps>(AppContext);
+  const { selectedCell, handleChangeSelectedCell, currentOutputIndex } = useContext<AppContextProps>(AppContext);
 
   const rows = input.length;
   const cols = input[0].length;
@@ -28,7 +27,7 @@ export default function SolutionInput({ input, inputIndex }: SolutionInputProps)
       const y = Math.min(startPosition.y, endPosition.y);
       const sx = Math.abs(startPosition.x - endPosition.x) + 1;
       const sy = Math.abs(startPosition.y - endPosition.y) + 1;
-      handleChangeSelectedCell({...selectedCell, position: { x, y, sx, sy, source: 'input', matrixIndex: inputIndex, isCopy: true } });
+      handleChangeSelectedCell({...selectedCell, copyPosition: { x, y, sx, sy, source: 'input', z: currentOutputIndex } });
     }
   }
 
@@ -73,11 +72,11 @@ export default function SolutionInput({ input, inputIndex }: SolutionInputProps)
                   const y = Math.min(startPosition.y, i);
                   const sx = Math.abs(startPosition.x - j) + 1;
                   const sy = Math.abs(startPosition.y - i) + 1;
-                  handleChangeSelectedCell({...selectedCell, position: { x, y, sx, sy, source: 'input', matrixIndex: inputIndex, isCopy: false } });
+                  handleChangeSelectedCell({...selectedCell, position: { z: startPosition.z || 0, x, y, sx, sy, source: 'input' } });
                 }
               } }}
               onMouseOver={() => { if (startPosition && !endPosition) setCurrentPosition({ x: j, y: i }) }}
-              opacity={!selectedCell.position?.isCopy && selectedCell.position?.source === 'input' && startPosition && currentPosition && isBetweenPosition(startPosition, currentPosition, { x: j, y: i }) ? 0.5 : 1}
+              opacity={selectedCell.position?.source === 'input' && startPosition && currentPosition && isBetweenPosition(startPosition, currentPosition, { x: j, y: i }) ? 0.5 : 1}
             />
           ))
         )}

@@ -5,31 +5,30 @@ import { AppContext, type AppContextProps } from "../Context/AppContext";
 import type { FillStep } from "../../types/step";
 
 
-export default function EditOutputGridCell({ matrixIndex }: { matrixIndex: number }) {
+export default function EditOutputGridCell() {
 
-  const { selectedCell, handleChangeSelectedCell, handleChangeOutputSolution, outputSolution, step, setStep } = useContext<AppContextProps>(AppContext);
-  
+  const { selectedCell, handleChangeSelectedCell, setOutputSolution, outputSolution, step, setStep, currentOutputIndex } = useContext<AppContextProps>(AppContext);
+
   const handleClick = (index: DIGIT) => {
     if (selectedCell.mode === "select" && selectedCell.position) {
       const { x, y, sx, sy, source } = selectedCell.position;
       if (source === "output") {
         for (let i = x; i < x + sx; i++) {
           for (let j = y; j < y + sy; j++) {
-            outputSolution[matrixIndex][j][i] = index;
+            outputSolution[currentOutputIndex][j][i] = index;
           }
         }
         const newStep: FillStep = {
           action: 'fill',
-          matrixIndex: matrixIndex,
           options: {
-            position: { x, y },
+            position: { x, y, z: currentOutputIndex },
             size: { width: sx, height: sy },
             color: index
           },
-          newOutput: [...outputSolution]
+          newOutput: outputSolution
         };
         setStep([...step, newStep]);
-        handleChangeOutputSolution([...outputSolution]);
+        setOutputSolution(outputSolution);
       }
     }
     handleChangeSelectedCell({ ...selectedCell, color: index });

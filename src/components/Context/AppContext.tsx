@@ -10,6 +10,8 @@ export type AppContextProps = {
   error: boolean | null,
   setError: (error: boolean | null) => void,
   step: Step[],
+  currentOutputIndex: number,
+  setCurrentOutputIndex: (index: number) => void,
   setStep: (step: Step[]) => void,
   trainingData: TrainingData | null,
   trainingSolution: TrainingSolutionData | null,
@@ -18,32 +20,38 @@ export type AppContextProps = {
   listTrainingId: Array<string>,
   choosenTrainingId: string | null,
   handleChangeChoosenTrainingId: (id: string | null) => void,
-  outputSolution: [Array<Array<DIGIT>>],
-  handleChangeOutputSolution: (output: [Array<Array<DIGIT>>]) => void,
-  inputSolution?: [Array<Array<DIGIT>>],
-  handleChangeInputSolution: (input: [Array<Array<DIGIT>>] | undefined) => void,
+  outputSolution: Array<Array<Array<DIGIT>>>,
+  setOutputSolution: (output: Array<Array<Array<DIGIT>>>) => void,
+  inputSolution?: Array<Array<Array<DIGIT>>>,
+  handleChangeInputSolution: (input: Array<Array<Array<DIGIT>>>) => void,
   selectedCell: SelectedCell,
   handleChangeSelectedCell: (selectedCell: SelectedCell) => void,
+  redoStep: Step[],
+  setRedoStep: (step: Step[]) => void,
 }
 
 export const AppContext = createContext<AppContextProps>({
   error: null,
-  setError: () => {},
+  setError: () => { },
   step: [],
-  setStep: () => {},
+  setStep: () => { },
+  redoStep: [],
+  setRedoStep: () => { },
+  currentOutputIndex: 0,
+  setCurrentOutputIndex: () => { },
   trainingData: null,
-  setTrainingData: () => {},
+  setTrainingData: () => { },
   listTrainingId: [],
   choosenTrainingId: null,
-  handleChangeChoosenTrainingId: () => {},
+  handleChangeChoosenTrainingId: () => { },
   outputSolution: [DEFAULT_SOLUTION_MATRIX],
-  handleChangeOutputSolution: () => {},
+  setOutputSolution: () => { },
   inputSolution: undefined,
-  handleChangeInputSolution: () => {},
+  handleChangeInputSolution: () => { },
   selectedCell: DEFAULT_SELECTED_CELL,
-  handleChangeSelectedCell: () => {},
+  handleChangeSelectedCell: () => { },
   trainingSolution: null,
-  setTrainingSolution: () => {},
+  setTrainingSolution: () => { },
 });
 
 export default function AppContextProvider({ children }: PropsWithChildren) {
@@ -51,21 +59,19 @@ export default function AppContextProvider({ children }: PropsWithChildren) {
   const [error, setError] = useState<boolean | null>(null);
   const [trainingSolution, setTrainingSolution] = useState<TrainingSolutionData | null>(null);
   const [step, setStep] = useState<Step[]>([]);
-  const [outputSolution, setOutputSolution] = useState<[Array<Array<DIGIT>>]>([DEFAULT_SOLUTION_MATRIX]);
+  const [currentOutputIndex, setCurrentOutputIndex] = useState<number>(0);
+  const [redoStep, setRedoStep] = useState<Step[]>([]);
+  const [outputSolution, setOutputSolution] = useState<Array<Array<Array<DIGIT>>>>([DEFAULT_SOLUTION_MATRIX]);
   const listTrainingId = useMemo(() => Object.keys(trainingData || {}).map(key => key), [trainingData]);
   const [choosenTrainingId, setChoosenTrainingId] = useState<string | null>(null);
-  const [inputSolution, setInputSolution] = useState<[Array<Array<DIGIT>>] | undefined>(undefined);
+  const [inputSolution, setInputSolution] = useState<Array<Array<Array<DIGIT>>>>([]);
   const [selectedCell, setSelectedCell] = useState<SelectedCell>(DEFAULT_SELECTED_CELL);
   const handleChangeChoosenTrainingId = (id: string | null) => {
     setChoosenTrainingId(id);
   };
 
-  const handleChangeInputSolution = (input: [Array<Array<DIGIT>>] | undefined) => {
+  const handleChangeInputSolution = (input: Array<Array<Array<DIGIT>>>) => {
     setInputSolution(input);
-  };
-
-  const handleChangeOutputSolution = (output: [Array<Array<DIGIT>>]) => {
-    setOutputSolution(output);
   };
 
   const handleChangeSelectedCell = (selectedCell: SelectedCell) => {
@@ -73,7 +79,7 @@ export default function AppContextProvider({ children }: PropsWithChildren) {
   };
 
   return (
-    <AppContext.Provider value={{ trainingData, setTrainingData, listTrainingId, choosenTrainingId, handleChangeChoosenTrainingId, outputSolution, handleChangeOutputSolution, inputSolution, handleChangeInputSolution, selectedCell, handleChangeSelectedCell, trainingSolution, setTrainingSolution, step, setStep, error, setError }}>
+    <AppContext.Provider value={{ trainingData, setTrainingData, listTrainingId, choosenTrainingId, handleChangeChoosenTrainingId, outputSolution, setOutputSolution, inputSolution, handleChangeInputSolution, selectedCell, handleChangeSelectedCell, trainingSolution, setTrainingSolution, step, setStep, currentOutputIndex, setCurrentOutputIndex, redoStep, setRedoStep, error, setError }}>
       {children}
     </AppContext.Provider>
   );

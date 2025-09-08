@@ -5,11 +5,10 @@ import { DEFAULT_SOLUTION_MATRIX, type DIGIT } from "../../const";
 import { cloneDeep } from "lodash";
 import type { ClearStep, CopyStep, ResizeStep } from "../../types/step";
 
-
-export default function ResizeInput({ matrixIndex }: { matrixIndex: number }) {
-  const { outputSolution, handleChangeOutputSolution, inputSolution, setStep, step } = useContext<AppContextProps>(AppContext);
-  const rows = outputSolution[matrixIndex].length;
-  const cols = outputSolution[matrixIndex][0].length;
+export default function ResizeOuput() {
+  const { outputSolution, setOutputSolution, inputSolution, setStep, step, currentOutputIndex, setCurrentOutputIndex, redoStep, setRedoStep } = useContext<AppContextProps>(AppContext);
+  const rows = outputSolution[currentOutputIndex].length;
+  const cols = outputSolution[currentOutputIndex][0].length;
   const [size, setSize] = useState<string>(`${cols}x${rows}`);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,28 +27,28 @@ export default function ResizeInput({ matrixIndex }: { matrixIndex: number }) {
     }
 
     const newOutputMatrix: Array<Array<DIGIT>> = Array.from({ length: newRows }, (_, _i) => Array.from({ length: newCols }, (_, _j) => "-1" as DIGIT ));
-    const oldRows = outputSolution[matrixIndex].length;
-    const oldCols = outputSolution[matrixIndex][0].length;
+    const oldRows = outputSolution[currentOutputIndex].length;
+    const oldCols = outputSolution[currentOutputIndex][0].length;
 
     const minRows = Math.min(oldRows, newRows);
     const minCols = Math.min(oldCols, newCols);
 
     for (let i = 0; i < minRows; i++) {
       for (let j = 0; j < minCols; j++) {
-        newOutputMatrix[i][j] = outputSolution[matrixIndex][i][j];
+        newOutputMatrix[i][j] = outputSolution[currentOutputIndex][i][j];
       }
     }
     const newOutput = cloneDeep(outputSolution);
-    newOutput[matrixIndex] = newOutputMatrix;
+    newOutput[currentOutputIndex] = newOutputMatrix;
 
-    handleChangeOutputSolution(newOutput);
+    setOutputSolution(newOutput);
     const newStep: ResizeStep = {
       action: 'resize',
-      matrixIndex,
       options: {
+        z: currentOutputIndex,
         size: { width: newCols, height: newRows },
       },
-      newOutput
+      newOutput: outputSolution
     };
     setStep([...step, newStep]);
   }
@@ -57,53 +56,72 @@ export default function ResizeInput({ matrixIndex }: { matrixIndex: number }) {
   const handleCopyFromInput = () => {
     // Implement copy from input logic
     if (inputSolution) {
-      const newOutputMatrix = cloneDeep(inputSolution[matrixIndex]);
-      const newOutput = cloneDeep(outputSolution);
-      newOutput[matrixIndex] = newOutputMatrix;
-      // Create a copy step
+      const newOutput = cloneDeep(inputSolution);
+      outputSolution[currentOutputIndex] = newOutput;
       const newStep: CopyStep = {
         action: 'copy',
         options: {
           from: {
             source: 'input',
-            matrixIndex: matrixIndex,
             position: { x: 0, y: 0 },
-            size: { width: newOutputMatrix[0].length, height: newOutputMatrix.length },
+            size: { width: inputSolution[0].length, height: inputSolution.length },
           },
           to: {
-            matrixIndex: matrixIndex,
-            position: { x: 0, y: 0 }
+            position: { x: 0, y: 0, z: currentOutputIndex }
           }
         },
-        newOutput 
+        newOutput: outputSolution
       };
-      handleChangeOutputSolution(newOutput);
+      setOutputSolution(outputSolution);
       setStep([...step, newStep]);
       setSize(`${newOutput[0].length}x${newOutput.length}`);
     }
   }
 
   const handleClear = () => {
-    const newOutputMatrix: Array<Array<DIGIT>> = Array.from({ length: rows }, (_, _i) => Array.from({ length: cols }, (_, _j) => 0 as DIGIT ));
-    const newOutput = cloneDeep(outputSolution);
-    newOutput[matrixIndex] = newOutputMatrix;
+    const newOutput: Array<Array<DIGIT>> = Array.from({ length: rows }, (_, _i) => Array.from({ length: cols }, (_, _j) => "-1" as DIGIT ));
+    outputSolution[currentOutputIndex] = newOutput;
     const newStep: ClearStep = {
       action: 'clear',
-      matrixIndex,
       options: {
+        z: currentOutputIndex,
         size: { width: cols, height: rows },
       },
-      newOutput
+      newOutput: outputSolution
     }
     setStep([...step, newStep]);
-    handleChangeOutputSolution(newOutput);
+    setOutputSolution(outputSolution);
   }
 
   const handleReset = () => {
-    const newOutputSolution = cloneDeep(outputSolution);
-    newOutputSolution[matrixIndex] = cloneDeep(DEFAULT_SOLUTION_MATRIX);
-    handleChangeOutputSolution(newOutputSolution);
+    setOutputSolution([DEFAULT_SOLUTION_MATRIX]);
+    setCurrentOutputIndex(0);
     setStep([]);
+  }
+
+  const handleAddMoreOutput = () => {
+    setOutputSolution([...outputSolution, DEFAULT_SOLUTION_MATRIX]);
+  }
+
+  const handleUndo = () => {
+    const popStep = step.pop();
+    if (popStep) {
+      setRedoStep([popStep, ...redoStep]);
+    }
+
+    const lastStep = step[step.length - 1];
+    const newOutput = lastStep ? lastStep.newOutput : [DEFAULT_SOLUTION_MATRIX];
+    setOutputSolution(newOutput);
+    setStep(step);
+  }
+
+  const handleRedo = () => {
+    const popStep = redoStep.shift();
+    if (popStep) {
+      setStep([...step, popStep]);
+      setOutputSolution(popStep.newOutput);
+      setRedoStep(redoStep);
+    }
   }
 
   return (
@@ -117,10 +135,13 @@ export default function ResizeInput({ matrixIndex }: { matrixIndex: number }) {
           </Box>
           {error && <Typography color="error" variant="caption">{error}</Typography>}
         </Box>
-        <Box display='flex' flexDirection='row'>
+        <Box display='flex' flexDirection='row' maxWidth='60%' flexWrap='wrap' gap={1}>
+          <Button variant="contained" size="small" sx={{ marginRight: 1 }} onClick={handleAddMoreOutput}>Add More Output</Button>
           <Button variant="contained" size="small" sx={{ marginRight: 1 }} onClick={handleCopyFromInput}>Copy from input</Button>
           <Button variant="contained" size="small" sx={{ marginRight: 1 }} onClick={handleClear}>Clear</Button>
-          <Button variant="contained" size="small" onClick={handleReset}>Reset</Button>
+          <Button variant="contained" size="small" sx={{ marginRight: 1 }} onClick={handleReset}>Reset</Button>
+          <Button variant="contained" size="small" sx={{ marginRight: 1 }} onClick={handleUndo}>Undo</Button>
+          <Button variant="contained" size="small" onClick={handleRedo}>Redo</Button>
         </Box>
       </Box>
     </Box>

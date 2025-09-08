@@ -7,7 +7,7 @@ import { compareValue } from "../../utils/compareValue";
 export default function SubmitSolution() {
   const { outputSolution, trainingSolution, choosenTrainingId, step, error, setError } = useContext<AppContextProps>(AppContext);
   const handleSubmit = () => {
-    const isCorrect = Boolean(choosenTrainingId && compareValue(outputSolution, trainingSolution?.[choosenTrainingId] || []));
+    const isCorrect = Boolean(choosenTrainingId && compareValue(outputSolution, trainingSolution ? trainingSolution[choosenTrainingId] : null));
     setError(isCorrect);
   } 
 
