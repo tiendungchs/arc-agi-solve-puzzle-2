@@ -8,7 +8,7 @@ import type { TrainingSolutionData } from './types/trainingSolutionData';
 import { DEFAULT_SOLUTION_MATRIX, type DIGIT } from './const';
 
 function App() {
-  const { trainingData, setTrainingData, handleChangeChoosenTrainingId, choosenTrainingId, listTrainingId, setTrainingSolution, setStep, setError, handleChangeOutputSolution } = useContext<AppContextProps>(AppContext);
+  const { trainingData, setTrainingData, handleChangeChoosenTrainingId, choosenTrainingId, listTrainingId, setTrainingSolution, setStep, setError, setOutputSolution } = useContext<AppContextProps>(AppContext);
   const handleFileChange = (newFile: File | null) => {
     if (newFile) {
       const reader = new FileReader();
@@ -63,7 +63,7 @@ function App() {
               handleChangeChoosenTrainingId(newValue);
               setStep([]);
               setError(null);
-              handleChangeOutputSolution(Array.from({ length: newValue ? (trainingData?.[newValue].test.length || 1) : 1 }, () => DEFAULT_SOLUTION_MATRIX) as [Array<Array<DIGIT>>]);
+              setOutputSolution(Array.from({ length: newValue ? (trainingData?.[newValue].test.length || 1) : 1 }, () => DEFAULT_SOLUTION_MATRIX) as [Array<Array<DIGIT>>]);
             }}
             renderInput={(params) => <TextField {...params} label="Select Training ID" />}
           />

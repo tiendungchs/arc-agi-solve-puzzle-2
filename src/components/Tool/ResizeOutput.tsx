@@ -7,6 +7,7 @@ import type { ClearStep, CopyStep, ResizeStep } from "../../types/step";
 
 export default function ResizeOuput() {
   const { outputSolution, setOutputSolution, inputSolution, setStep, step, currentOutputIndex, setCurrentOutputIndex, redoStep, setRedoStep } = useContext<AppContextProps>(AppContext);
+
   const rows = outputSolution[currentOutputIndex].length;
   const cols = outputSolution[currentOutputIndex][0].length;
   const [size, setSize] = useState<string>(`${cols}x${rows}`);
@@ -26,7 +27,7 @@ export default function ResizeOuput() {
       setError(null);
     }
 
-    const newOutputMatrix: Array<Array<DIGIT>> = Array.from({ length: newRows }, (_, _i) => Array.from({ length: newCols }, (_, _j) => "-1" as DIGIT ));
+    const newOutputMatrix: Array<Array<DIGIT>> = Array.from({ length: newRows }, (_, _i) => Array.from({ length: newCols }, (_, _j) => 0 as DIGIT ));
     const oldRows = outputSolution[currentOutputIndex].length;
     const oldCols = outputSolution[currentOutputIndex][0].length;
 
@@ -74,7 +75,7 @@ export default function ResizeOuput() {
       };
       setOutputSolution(outputSolution);
       setStep([...step, newStep]);
-      setSize(`${newOutput[0].length}x${newOutput.length}`);
+      setSize(`${newOutput.length}x${newOutput[0].length}`);
     }
   }
 
@@ -109,8 +110,10 @@ export default function ResizeOuput() {
       setRedoStep([popStep, ...redoStep]);
     }
 
-    const lastStep = step[step.length - 1];
-    const newOutput = lastStep ? lastStep.newOutput : [DEFAULT_SOLUTION_MATRIX];
+    const newOutput = popStep ? popStep.newOutput : [DEFAULT_SOLUTION_MATRIX];
+    if (currentOutputIndex >= newOutput.length) {
+      setCurrentOutputIndex(0);
+    }
     setOutputSolution(newOutput);
     setStep(step);
   }

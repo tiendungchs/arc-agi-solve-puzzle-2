@@ -1,4 +1,4 @@
-import { createContext, useMemo, useState, type PropsWithChildren } from "react";
+import { createContext, useMemo, useState, type Dispatch, type PropsWithChildren } from "react";
 import type { TrainingData } from "../../types/trainingData"
 import { DEFAULT_SELECTED_CELL, DEFAULT_SOLUTION_MATRIX, type DIGIT } from "../../const";
 import type { SelectedCell } from "../../types/selectedCell";
@@ -21,9 +21,9 @@ export type AppContextProps = {
   choosenTrainingId: string | null,
   handleChangeChoosenTrainingId: (id: string | null) => void,
   outputSolution: Array<Array<Array<DIGIT>>>,
-  setOutputSolution: (output: Array<Array<Array<DIGIT>>>) => void,
-  inputSolution?: Array<Array<Array<DIGIT>>>,
-  handleChangeInputSolution: (input: Array<Array<Array<DIGIT>>>) => void,
+  setOutputSolution: Dispatch<React.SetStateAction<Array<Array<Array<DIGIT>>>>>,
+  inputSolution?: Array<Array<DIGIT>>,
+  handleChangeInputSolution: (input: Array<Array<DIGIT>>) => void,
   selectedCell: SelectedCell,
   handleChangeSelectedCell: (selectedCell: SelectedCell) => void,
   redoStep: Step[],
@@ -64,13 +64,13 @@ export default function AppContextProvider({ children }: PropsWithChildren) {
   const [outputSolution, setOutputSolution] = useState<Array<Array<Array<DIGIT>>>>([DEFAULT_SOLUTION_MATRIX]);
   const listTrainingId = useMemo(() => Object.keys(trainingData || {}).map(key => key), [trainingData]);
   const [choosenTrainingId, setChoosenTrainingId] = useState<string | null>(null);
-  const [inputSolution, setInputSolution] = useState<Array<Array<Array<DIGIT>>>>([]);
+  const [inputSolution, setInputSolution] = useState<Array<Array<DIGIT>>>([]);
   const [selectedCell, setSelectedCell] = useState<SelectedCell>(DEFAULT_SELECTED_CELL);
   const handleChangeChoosenTrainingId = (id: string | null) => {
     setChoosenTrainingId(id);
   };
 
-  const handleChangeInputSolution = (input: Array<Array<Array<DIGIT>>>) => {
+  const handleChangeInputSolution = (input: Array<Array<DIGIT>>) => {
     setInputSolution(input);
   };
 

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState, type KeyboardEvent } from "react";
 import { AppContext, type AppContextProps } from "../Context/AppContext";
 import { Layer, Rect, Stage } from "react-konva";
 import { COLOR_MAP, UNIT, type DIGIT } from "../../const";
@@ -14,6 +14,7 @@ import { Box } from "@mui/material";
 export default function SolutionOutput() {
 
   const { outputSolution, selectedCell, setOutputSolution, handleChangeSelectedCell, inputSolution, step, setStep, currentOutputIndex, setCurrentOutputIndex } = useContext<AppContextProps>(AppContext);
+
   const [selectedPos, setSelectedPos] = useState<Position | null>(null);
 
   const [startPosition, setStartPosition] = useState<Position | null>(null);
@@ -81,7 +82,7 @@ export default function SolutionOutput() {
   }
 
   // Select:Ctrl+c/v=copy/paste, r=rotate, h/v=flip, arrow=project, ctrl+arrow=force project
-  const handleChangeInput = (e: KeyboardEvent) => {
+  const handleChangeInput = (e: KeyboardEvent<HTMLDivElement>) => {
     const isCtrlOrCmd = e.ctrlKey || e.metaKey;
     if (isCtrlOrCmd && e.key === 'c' && startPosition && endPosition && selectedCell.mode === "select") {
       const x = Math.min(startPosition.x, endPosition.x);
@@ -91,7 +92,7 @@ export default function SolutionOutput() {
       handleChangeSelectedCell({...selectedCell, copyPosition: { z: startPosition.z || 0, x, y, sx, sy, source: 'output' } });
     }
 
-    if (isCtrlOrCmd && e.key === 'v' && selectedCell.mode === "select" && selectedPos && selectedCell.copyPosition && selectedCell.copyPosition) {
+    if (isCtrlOrCmd && e.key === 'v' && selectedCell.mode === "select" && selectedPos && selectedCell.copyPosition) {
       // Handle paste operation
       const newOutput = cloneDeep(outputSolution);
       const newRows = newOutput[currentOutputIndex].length;
@@ -124,8 +125,15 @@ export default function SolutionOutput() {
           }
         }
 
+        setOutputSolution(oldOutput => {
+          for (let i = 0; i < minDeltaRows; i++) {
+            for (let j = 0; j < minDeltaCols; j++) {
+              oldOutput[selectedPos.z || 0][selectedPos.y + j][selectedPos.x + i] = inputSolution[y + j][x + i];
+            }
+          }
+          return oldOutput;
+        });
         newStep.options.from.source = "input";
-
       }
       else if (source === 'output') {
         const minDeltaRows = Math.min(sx, newRows - selectedPos.x);
@@ -135,8 +143,16 @@ export default function SolutionOutput() {
             newOutput[selectedPos.z || 0][selectedPos.y + j][selectedPos.x + i] = outputSolution[z || 0][y + j][x + i];
           }
         }
+
+        setOutputSolution(oldOutput => {
+          for (let i = 0; i < minDeltaRows; i++) {
+            for (let j = 0; j < minDeltaCols; j++) {
+              oldOutput[selectedPos.z || 0][selectedPos.y + j][selectedPos.x + i] = outputSolution[z || 0][y + j][x + i];
+            }
+          }
+          return oldOutput;
+        });
       }
-      setOutputSolution(newOutput);
       newStep.newOutput = newOutput;
       setStep([...step, newStep]);
     }
@@ -314,18 +330,11 @@ export default function SolutionOutput() {
     }
   }
 
-  useEffect(() => {
-      window.addEventListener('keydown', handleChangeInput);
-      return () => {
-        window.removeEventListener('keydown', handleChangeInput);
-      };
-}, [startPosition, endPosition, selectedCell, outputSolution, selectedPos, step]);  
-
   return (
     <>
       {outputSolution?.map((solutions, k) => (
-        <Box key={k} display="flex" flexDirection='column' marginBottom={2} onClick={() => setCurrentOutputIndex(k)}>
-          <Stage width={solutions.length * UNIT} height={solutions[0].length * UNIT}>
+        <Box key={k} display="flex" flexDirection='column' marginBottom={2} onClick={() => setCurrentOutputIndex(k)} tabIndex={0} onKeyDown={handleChangeInput}>
+          <Stage height={solutions.length * UNIT} width={solutions[0].length * UNIT}>
             <Layer>
               {solutions.map((row, i) =>
                 row.map((cell, j) => (
@@ -336,7 +345,7 @@ export default function SolutionOutput() {
                     width={UNIT}
                     height={UNIT}
                     fill={COLOR_MAP[cell] || "#ffffff"}
-                    stroke="#000000"
+                    stroke="#fbfafaff"
                     strokeWidth={1}
                     onClick={() => handleOnClick(k, i, j)}
                     onMouseDown={() => { if (selectedCell.mode === "select") {
