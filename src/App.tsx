@@ -5,9 +5,10 @@ import { type AppContextProps, AppContext } from './components/Context/AppContex
 import Layout from './components/Layout';
 import { Autocomplete, Box, TextField, Typography } from '@mui/material';
 import type { TrainingSolutionData } from './types/trainingSolutionData';
+import { DEFAULT_SOLUTION_MATRIX, type DIGIT } from './const';
 
 function App() {
-  const { setTrainingData, handleChangeChoosenTrainingId, choosenTrainingId, listTrainingId, setTrainingSolution, setStep } = useContext<AppContextProps>(AppContext);
+  const { trainingData, setTrainingData, handleChangeChoosenTrainingId, choosenTrainingId, listTrainingId, setTrainingSolution, setStep, setError, handleChangeOutputSolution } = useContext<AppContextProps>(AppContext);
   const handleFileChange = (newFile: File | null) => {
     if (newFile) {
       const reader = new FileReader();
@@ -61,6 +62,8 @@ function App() {
             onChange={(_, newValue) => {
               handleChangeChoosenTrainingId(newValue);
               setStep([]);
+              setError(null);
+              handleChangeOutputSolution(Array.from({ length: newValue ? (trainingData?.[newValue].test.length || 1) : 1 }, () => DEFAULT_SOLUTION_MATRIX) as [Array<Array<DIGIT>>]);
             }}
             renderInput={(params) => <TextField {...params} label="Select Training ID" />}
           />

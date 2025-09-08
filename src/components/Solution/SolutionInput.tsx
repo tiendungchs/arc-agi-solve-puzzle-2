@@ -7,9 +7,10 @@ import { isBetweenPosition } from "../../utils/isBetween";
 
 export type SolutionInputProps = {
   input: Array<Array<DIGIT>>,
+  inputIndex: number
 }
 
-export default function SolutionInput({ input }: SolutionInputProps) {
+export default function SolutionInput({ input, inputIndex }: SolutionInputProps) {
 
   const { selectedCell, handleChangeSelectedCell } = useContext<AppContextProps>(AppContext);
 
@@ -27,7 +28,7 @@ export default function SolutionInput({ input }: SolutionInputProps) {
       const y = Math.min(startPosition.y, endPosition.y);
       const sx = Math.abs(startPosition.x - endPosition.x) + 1;
       const sy = Math.abs(startPosition.y - endPosition.y) + 1;
-      handleChangeSelectedCell({...selectedCell, position: { x, y, sx, sy, source: 'input', isCopy: true } });
+      handleChangeSelectedCell({...selectedCell, position: { x, y, sx, sy, source: 'input', matrixIndex: inputIndex, isCopy: true } });
     }
   }
 
@@ -57,8 +58,8 @@ export default function SolutionInput({ input }: SolutionInputProps) {
               y={i * UNIT}
               width={UNIT}
               height={UNIT}
-              fill={COLOR_MAP[cell] || "#ffffff"}
-              stroke="#000000"
+              fill={COLOR_MAP[cell] || "#000000ff"}
+              stroke="#fbfafaff"
               strokeWidth={1}
               onMouseDown={() => { if (selectedCell.mode === "select") {
                 setStartPosition({ x: j, y: i })
@@ -72,11 +73,11 @@ export default function SolutionInput({ input }: SolutionInputProps) {
                   const y = Math.min(startPosition.y, i);
                   const sx = Math.abs(startPosition.x - j) + 1;
                   const sy = Math.abs(startPosition.y - i) + 1;
-                  handleChangeSelectedCell({...selectedCell, position: { x, y, sx, sy, source: 'input', isCopy: false } });
+                  handleChangeSelectedCell({...selectedCell, position: { x, y, sx, sy, source: 'input', matrixIndex: inputIndex, isCopy: false } });
                 }
               } }}
               onMouseOver={() => { if (startPosition && !endPosition) setCurrentPosition({ x: j, y: i }) }}
-              opacity={startPosition && currentPosition && isBetweenPosition(startPosition, currentPosition, { x: j, y: i }) ? 0.5 : 1}
+              opacity={!selectedCell.position?.isCopy && selectedCell.position?.source === 'input' && startPosition && currentPosition && isBetweenPosition(startPosition, currentPosition, { x: j, y: i }) ? 0.5 : 1}
             />
           ))
         )}

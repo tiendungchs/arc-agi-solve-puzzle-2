@@ -1,32 +1,26 @@
 import { Grid, Typography } from "@mui/material"
-import type { TrainingData } from "../../types/trainingData"
 import SolutionInput from "./SolutionInput"
 import SolutionOutput from "./SolutionOutput"
-import { useContext, useEffect } from "react"
-import { AppContext, type AppContextProps } from "../Context/AppContext"
+import type { DIGIT } from "../../const"
 
 type SolutionProps = {
-  input?: TrainingData[string]["test"][0]["input"], 
+  inputSolution?: [Array<Array<DIGIT>>],
+  inputIndex: number
 }
 
-export default function Solution({ input }: SolutionProps) {
+export default function Solution({ inputSolution, inputIndex }: SolutionProps) {
 
-  const { handleChangeInputSolution } = useContext<AppContextProps>(AppContext);
-
-  useEffect(() => {
-    if (input) handleChangeInputSolution(input);
-  }, [input]);
-
-  if (!input) return null
+  if (!inputSolution) return null
+  const input = inputSolution[inputIndex];
   return (
     <Grid container>
       <Grid size={5}>
         <Typography variant="h6" marginBottom={1}>Input</Typography>
-        <SolutionInput input={input} />
+        <SolutionInput input={input} inputIndex={inputIndex} />
       </Grid>
       <Grid size={7}>
         <Typography variant="h6" marginBottom={1}>Output</Typography>
-        <SolutionOutput />
+        <SolutionOutput outputIndex={inputIndex} />
       </Grid>
     </Grid>
   )

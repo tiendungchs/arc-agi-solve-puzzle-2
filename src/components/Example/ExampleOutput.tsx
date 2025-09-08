@@ -22,8 +22,8 @@ export default function ExampleOutput({ output }: ExampleOutputProps) {
               y={rowIndex * UNIT}
               width={UNIT}
               height={UNIT}
-              fill={COLOR_MAP[cell] || "#ffffff"}
-              stroke="#000000"
+              fill={COLOR_MAP[cell] || "#000000ff"}
+              stroke="#fbfafaff"
               strokeWidth={1}
             />
           ))

@@ -1,15 +1,13 @@
 import { Box, Button, Typography } from "@mui/material";
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import { AppContext, type AppContextProps } from "../Context/AppContext";
 import { compareValue } from "../../utils/compareValue";
 
 
 export default function SubmitSolution() {
-  const { outputSolution, trainingSolution, choosenTrainingId, step } = useContext<AppContextProps>(AppContext);
-  const [error, setError] = useState<boolean | null>(null);
-
+  const { outputSolution, trainingSolution, choosenTrainingId, step, error, setError } = useContext<AppContextProps>(AppContext);
   const handleSubmit = () => {
-    const isCorrect = Boolean(choosenTrainingId && compareValue(outputSolution, trainingSolution?.[choosenTrainingId].at(0) || []));
+    const isCorrect = Boolean(choosenTrainingId && compareValue(outputSolution, trainingSolution?.[choosenTrainingId] || []));
     setError(isCorrect);
   } 
 
@@ -41,12 +39,12 @@ export default function SubmitSolution() {
         <Typography variant="body1" color="error.main" marginTop={2}>
           Incorrect Solution!
         </Typography>)}
-      {error === true && <Box marginTop={2}>
+      {error !== null && (error === true && <Box marginTop={2}>
         <Typography variant="h6">4. Steps taken:</Typography>
         <Button variant="outlined" color="primary" onClick={handleDownloadStep}>
           Download Steps (check console)
         </Button>
-      </Box>}
+      </Box>)}
     </Box>
   )
 }
