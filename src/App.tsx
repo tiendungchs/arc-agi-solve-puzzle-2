@@ -52,7 +52,7 @@ function App() {
             />
           </Box>
         </Box>
-        {choosenTrainingId && 
+        {choosenTrainingId &&
         <>
           <Autocomplete
             fullWidth={false}

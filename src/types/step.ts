@@ -4,9 +4,10 @@ import type { Position } from "./position"
 export type ResizeStep = {
   action: 'resize',
   options: {
+    z: number,
     size: { width: number, height: number },
   },
-  newOutput: Array<Array<DIGIT>>,
+  newOutput: Array<Array<Array<DIGIT>>>,
 }
 
 export type CopyStep = {
@@ -21,15 +22,16 @@ export type CopyStep = {
       position: Position
     }
   },
-  newOutput: Array<Array<DIGIT>>,
+  newOutput: Array<Array<Array<DIGIT>>>,
 }
 
 export type ClearStep = {
   action: 'clear',
   options: {
+    z: number,
     size: { width: number, height: number },
   },
-  newOutput: Array<Array<DIGIT>>,
+  newOutput: Array<Array<Array<DIGIT>>>,
 }
 
 export type FillStep = {
@@ -39,7 +41,7 @@ export type FillStep = {
     size?: { width: number, height: number },
     color: DIGIT
   },
-  newOutput: Array<Array<DIGIT>>,
+  newOutput: Array<Array<Array<DIGIT>>>,
 }
 
 export type Step = ResizeStep | CopyStep | ClearStep | FillStep;

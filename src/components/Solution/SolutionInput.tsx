@@ -27,7 +27,7 @@ export default function SolutionInput({ input }: SolutionInputProps) {
       const y = Math.min(startPosition.y, endPosition.y);
       const sx = Math.abs(startPosition.x - endPosition.x) + 1;
       const sy = Math.abs(startPosition.y - endPosition.y) + 1;
-      handleChangeSelectedCell({...selectedCell, position: { x, y, sx, sy, source: 'input', isCopy: true } });
+      handleChangeSelectedCell({...selectedCell, copyPosition: { x, y, sx, sy, source: 'input' } });
     }
   }
 
@@ -72,7 +72,7 @@ export default function SolutionInput({ input }: SolutionInputProps) {
                   const y = Math.min(startPosition.y, i);
                   const sx = Math.abs(startPosition.x - j) + 1;
                   const sy = Math.abs(startPosition.y - i) + 1;
-                  handleChangeSelectedCell({...selectedCell, position: { x, y, sx, sy, source: 'input', isCopy: false } });
+                  handleChangeSelectedCell({...selectedCell, position: { z: startPosition.z || 0, x, y, sx, sy, source: 'input' } });
                 }
               } }}
               onMouseOver={() => { if (startPosition && !endPosition) setCurrentPosition({ x: j, y: i }) }}

@@ -5,8 +5,8 @@ export const boundaryFill = (x: number, y: number, targetColor: DIGIT, replaceme
   // Implement boundary fill algorithm
   const fill = (x: number, y: number) => {
     if (x < 0 || x >= rect[0].length || y < 0 || y >= rect.length) return;
-    if (rect[x][y] !== targetColor) return;
-    rect[x][y] = replacementColor;
+    if (rect[y][x] !== targetColor) return;
+    rect[y][x] = replacementColor;
     fill(x + 1, y);
     fill(x - 1, y);
     fill(x, y + 1);
