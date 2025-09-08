@@ -84,7 +84,7 @@ export default function ResizeInput({ matrixIndex }: { matrixIndex: number }) {
   }
 
   const handleClear = () => {
-    const newOutputMatrix: Array<Array<DIGIT>> = Array.from({ length: rows }, (_, _i) => Array.from({ length: cols }, (_, _j) => "-1" as DIGIT ));
+    const newOutputMatrix: Array<Array<DIGIT>> = Array.from({ length: rows }, (_, _i) => Array.from({ length: cols }, (_, _j) => 0 as DIGIT ));
     const newOutput = cloneDeep(outputSolution);
     newOutput[matrixIndex] = newOutputMatrix;
     const newStep: ClearStep = {

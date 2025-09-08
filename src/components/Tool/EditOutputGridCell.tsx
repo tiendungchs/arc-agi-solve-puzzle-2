@@ -42,6 +42,8 @@ export default function EditOutputGridCell({ matrixIndex }: { matrixIndex: numbe
         <Button variant="contained" size="small" sx={{ marginRight: 1 }} onClick={() => handleChangeSelectedCell({ ...selectedCell, mode: "edit", position: undefined })} color={selectedCell.mode === "edit" ? "primary" : "inherit"}>Edit</Button>
         <Button variant="contained" size="small" sx={{ marginRight: 1 }} onClick={() => handleChangeSelectedCell({ ...selectedCell, mode: "select" })} color={selectedCell.mode === "select" ? "primary" : "inherit"}>Select</Button>
         <Button variant="contained" size="small" sx={{ marginRight: 1 }} onClick={() => handleChangeSelectedCell({ ...selectedCell, mode: "fill", position: undefined })} color={selectedCell.mode === "fill" ? "primary" : "inherit"}>Fill</Button>
+      <Typography variant="h6" marginBottom={1}>Select:Ctrl+c/v=copy/paste, r=rotate, h/v=flip, arrow=project, ctrl+arrow=force project</Typography>
+
       </Box>
       <Box display="flex" flexDirection="row">
         {Array.from({ length: 10 }, (_, index) => (

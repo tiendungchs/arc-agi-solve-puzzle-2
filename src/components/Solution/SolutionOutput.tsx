@@ -1,12 +1,14 @@
 import { useContext, useEffect, useState } from "react";
 import { AppContext, type AppContextProps } from "../Context/AppContext";
 import { Layer, Rect, Stage } from "react-konva";
-import { COLOR_MAP, UNIT } from "../../const";
+import { COLOR_MAP, UNIT, type DIGIT } from "../../const";
 import { type Position } from "../../types/position";
 import { isBetweenPosition } from "../../utils/isBetween";
 import { cloneDeep } from "lodash"
 import { boundaryFill } from "../../utils/boundaryFill";
-import type { CopyStep, FillStep } from "../../types/step";
+import { projectRect } from "../../utils/projectRect";
+import type { CopyStep, FillStep, FlipStep, ProjectStep, RotateStep } from "../../types/step";
+import { projectRectForce } from "../../utils/projectRectForce";
 
 export default function SolutionOutput({ outputIndex }: { outputIndex: number }) {
 
@@ -112,7 +114,192 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
         }
       }
       handleChangeOutputSolution(newOutput);
+      // The new selectedCell is now the newly pasted area
+      selectedCell.mode = "select";
+      handleChangeSelectedCell({...selectedCell, position: { x: selectedPos.x, y: selectedPos.y, sx, sy, source: 'output', matrixIndex: outputIndex, isCopy: false } });
       setStep([...step, newStep]);
+    }
+    // rotate the selected area 90 degree clockwise
+    if (e.key === 'r') {
+      console.log(selectedCell.mode === "select");
+      console.log(selectedCell.position);
+      console.log(selectedCell.position && !selectedCell.position.isCopy);
+    }    
+    if (e.key === 'r' && selectedCell.mode === "select" && selectedCell.position && !selectedCell.position.isCopy) {
+      const { x, y, sx, sy } = selectedCell.position;
+      if (sx !== sy) {
+        alert("Only square selection can be rotated");
+        return;
+      }
+      const newOutput = cloneDeep(outputSolution);
+      // Create a temporary matrix to hold the rotated values
+      const tempMatrix = Array.from({ length: sx }, () => Array.from({ length: sy }, () => "-1" as DIGIT ));
+      for (let i = 0; i < sx; i++) {
+        for (let j = 0; j < sy; j++) {
+          tempMatrix[i][j] = outputSolution[outputIndex][y + i][x + j];
+        }
+      }
+      
+      // Rotate 90 degree clockwise and copy to newOutput
+      for (let i = 0; i < sx; i++) {
+        for (let j = 0; j < sy; j++) {
+          newOutput[outputIndex][y + i][x + j] = tempMatrix[sy - 1 - j][i];
+        }
+      }
+      handleChangeOutputSolution(newOutput);
+      const newStep: RotateStep = {
+        action: 'rotate',
+        matrixIndex: outputIndex,
+        options: {
+          position: { x, y },
+          size: { width: sx, height: sy },
+        },
+        newOutput
+      };
+      setStep([...step, newStep]);
+    }
+    // flip the selected area horizontally
+    if (e.key === 'h' && selectedCell.mode === "select" && selectedCell.position && !selectedCell.position.isCopy) {
+      const { x, y, sx, sy } = selectedCell.position;
+      const newOutput = cloneDeep(outputSolution);
+      // Create a temporary matrix to hold the flipped values
+      const tempMatrix = Array.from({ length: sx }, () => Array.from({ length: sy }, () => "-1" as DIGIT ));
+      for (let i = 0; i < sy; i++) {
+        for (let j = 0; j < sx; j++) {
+          tempMatrix[i][j] = outputSolution[outputIndex][y + i][x + j];
+        }
+      }
+      
+      // Flip horizontally and copy to newOutput
+      for (let i = 0; i < sy; i++) {
+        for (let j = 0; j < sx; j++) {
+          newOutput[outputIndex][y + i][x + j] = tempMatrix[i][sx - 1 - j];
+        }
+      }
+      handleChangeOutputSolution(newOutput);
+      const newStep: FlipStep = {
+        action: 'flip',
+        matrixIndex: outputIndex,
+        options: {
+          position: { x, y },
+          size: { width: sx, height: sy },
+          direction: 'horizontal'
+        },
+        newOutput
+      };
+      setStep([...step, newStep]);
+    }
+    // flip the selected area vertically
+    if (e.key === 'v' && selectedCell.mode === "select" && selectedCell.position && !selectedCell.position.isCopy) {
+      const { x, y, sx, sy } = selectedCell.position;
+      const newOutput = cloneDeep(outputSolution);
+      // Create a temporary matrix to hold the flipped values
+      const tempMatrix = Array.from({ length: sx }, () => Array.from({ length: sy }, () => "-1" as DIGIT ));
+      for (let i = 0; i < sy; i++) {
+        for (let j = 0; j < sx; j++) {
+          tempMatrix[i][j] = outputSolution[outputIndex][y + i][x + j];
+        }
+      }
+      
+      // Flip vertically and copy to newOutput
+      for (let i = 0; i < sy; i++) {
+        for (let j = 0; j < sx; j++) {
+          newOutput[outputIndex][y + i][x + j] = tempMatrix[sy - 1 - i][j];
+        }
+      }
+
+      handleChangeOutputSolution(newOutput);
+      const newStep: FlipStep = {
+        action: 'flip',
+        matrixIndex: outputIndex,
+        options: {
+          position: { x, y },
+          size: { width: sx, height: sy },
+          direction: 'vertical'
+        },
+        newOutput
+      };
+      setStep([...step, newStep]);
+    }
+    // project the selected area up, down, left, right
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key) && selectedCell.mode === "select" && selectedCell.position && !selectedCell.position.isCopy) {
+      const directionMap: { [key: string]: 'up' | 'down' | 'left' | 'right' } = {
+        'ArrowUp': 'up',
+        'ArrowDown': 'down',
+        'ArrowLeft': 'left',
+        'ArrowRight': 'right'
+      };
+      const direction = directionMap[e.key];
+      if (direction) {
+        const { x, y, sx, sy } = selectedCell.position;
+        // Rect = selected area, a temp matrix to hold the area to be projected
+        const newOutput = cloneDeep(outputSolution);
+        const tempMatrix = Array.from({ length: sy }, () => Array.from({ length: sx }, () => "-1" as DIGIT));
+        for (let i = 0; i < sy; i++) {
+          for (let j = 0; j < sx; j++) {
+            tempMatrix[i][j] = newOutput[outputIndex][y + i][x + j];
+          }
+        }
+        projectRect(tempMatrix, direction);
+        // copy the projected tempMatrix back to newOutput
+        for (let i = 0; i < sy; i++) {
+          for (let j = 0; j < sx; j++) {
+            newOutput[outputIndex][y + i][x + j] = tempMatrix[i][j];
+          }
+        }
+        handleChangeOutputSolution(newOutput);
+        const newStep: ProjectStep = {
+          action: 'project',
+          matrixIndex: outputIndex,
+          options: {
+            position: { x, y },
+            size: { width: sx, height: sy },
+            direction
+          },
+          newOutput
+        };
+        setStep([...step, newStep]);
+      }
+    }
+    // force project the selected area up, down, left, right, using project-pen
+    if (isCtrlOrCmd && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key) && selectedCell.mode === "select" && selectedCell.position && !selectedCell.position.isCopy) {
+      const directionMap: { [key: string]: 'up' | 'down' | 'left' | 'right' } = {
+        'ArrowUp': 'up',
+        'ArrowDown': 'down',
+        'ArrowLeft': 'left',
+        'ArrowRight': 'right'
+      };
+      const direction = directionMap[e.key];
+      if (direction) {
+        const { x, y, sx, sy } = selectedCell.position;
+        // Rect = selected area, a temp matrix to hold the area to be projected
+        const newOutput = cloneDeep(outputSolution);
+        const tempMatrix = Array.from({ length: sy }, () => Array.from({ length: sx }, () => "-1" as DIGIT));
+        for (let i = 0; i < sy; i++) {
+          for (let j = 0; j < sx; j++) {
+            tempMatrix[i][j] = newOutput[outputIndex][y + i][x + j];
+          }
+        }
+        projectRectForce(tempMatrix, direction);
+        // copy the projected tempMatrix back to newOutput
+        for (let i = 0; i < sy; i++) {
+          for (let j = 0; j < sx; j++) {
+            newOutput[outputIndex][y + i][x + j] = tempMatrix[i][j];
+          }
+        }
+        handleChangeOutputSolution(newOutput);
+        const newStep: ProjectStep = {
+          action: 'project-force',
+          matrixIndex: outputIndex,
+          options: {
+            position: { x, y },
+            size: { width: sx, height: sy },
+            direction
+          },
+          newOutput
+        };
+        setStep([...step, newStep]);
+      }
     }
   }
 
@@ -121,15 +308,14 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
       return () => {
         window.removeEventListener('keydown', handleChangeInput);
       };
-    }, [startPosition, endPosition]);
-  
-    useEffect(() => {
-      if (selectedCell.mode !== "select") {
-        setCurrentPosition(null);
-        setStartPosition(null);
-        setEndPosition(null);
-      }
-    }, [selectedCell.mode]);
+}, [startPosition, endPosition, selectedCell, outputSolution, selectedPos, step]);  
+    // useEffect(() => {
+    //   if (selectedCell.mode !== "select") {
+    //     setCurrentPosition(null);
+    //     setStartPosition(null);
+    //     setEndPosition(null);
+    //   }
+    // }, [selectedCell.mode]);
 
   return (
     <Stage width={cols * UNIT} height={rows * UNIT}>
@@ -163,7 +349,7 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
                   }
               }}}}
               onMouseOver={() => { if (startPosition && !endPosition) setCurrentPosition({ x: j, y: i }) }}
-              opacity={!selectedCell.position?.isCopy && startPosition && currentPosition && isBetweenPosition(startPosition, currentPosition, { x: j, y: i }) ? 0.5 : 1}
+              opacity={!selectedCell.position?.isCopy && selectedCell.position?.source === 'output' && startPosition && currentPosition && isBetweenPosition(startPosition, currentPosition, { x: j, y: i }) ? 0.5 : 1}
             />
           ))
         )}
@@ -171,3 +357,5 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
     </Stage>
   );
 }
+
+

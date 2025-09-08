@@ -77,7 +77,7 @@ export default function SolutionInput({ input, inputIndex }: SolutionInputProps)
                 }
               } }}
               onMouseOver={() => { if (startPosition && !endPosition) setCurrentPosition({ x: j, y: i }) }}
-              opacity={!selectedCell.position?.isCopy && startPosition && currentPosition && isBetweenPosition(startPosition, currentPosition, { x: j, y: i }) ? 0.5 : 1}
+              opacity={!selectedCell.position?.isCopy && selectedCell.position?.source === 'input' && startPosition && currentPosition && isBetweenPosition(startPosition, currentPosition, { x: j, y: i }) ? 0.5 : 1}
             />
           ))
         )}

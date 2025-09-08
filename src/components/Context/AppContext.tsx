@@ -4,6 +4,7 @@ import { DEFAULT_SELECTED_CELL, DEFAULT_SOLUTION_MATRIX, type DIGIT } from "../.
 import type { SelectedCell } from "../../types/selectedCell";
 import type { TrainingSolutionData } from "../../types/trainingSolutionData";
 import type { Step } from "../../types/step";
+import { set } from "lodash";
 
 export type AppContextProps = {
   step: Step[],
@@ -52,6 +53,7 @@ export default function AppContextProvider({ children }: PropsWithChildren) {
   const [selectedCell, setSelectedCell] = useState<SelectedCell>(DEFAULT_SELECTED_CELL);
   const handleChangeChoosenTrainingId = (id: string | null) => {
     setChoosenTrainingId(id);
+    setStep([]);
     //Default output solution is a list of id+1 DEFAULT_SOLUTION_MATRIX
     setOutputSolution(Array.from({ length: id ? (trainingData?.[id].test.length || 1) : 1 }, () => DEFAULT_SOLUTION_MATRIX) as [Array<Array<DIGIT>>]);
   };

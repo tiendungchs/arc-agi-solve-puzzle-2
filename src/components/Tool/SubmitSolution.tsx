@@ -5,7 +5,7 @@ import { compareValue } from "../../utils/compareValue";
 
 
 export default function SubmitSolution() {
-  const { outputSolution, trainingSolution, choosenTrainingId, step } = useContext<AppContextProps>(AppContext);
+  const { outputSolution, trainingSolution, choosenTrainingId, step, setStep } = useContext<AppContextProps>(AppContext);
   const [error, setError] = useState<boolean | null>(null);
 
   const handleSubmit = () => {
@@ -25,6 +25,8 @@ export default function SubmitSolution() {
     a.download = `${choosenTrainingId}_steps.json`;
     a.click();
     URL.revokeObjectURL(url);
+    // clear steps after download
+    setStep([]);
   };
 
   return (

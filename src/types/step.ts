@@ -10,6 +10,39 @@ export type ResizeStep = {
   newOutput: [Array<Array<DIGIT>>],
 }
 
+export type RotateStep = {
+  action: 'rotate',
+  matrixIndex: number, // 1 to 4
+  options: {
+    position: Position,
+    size: { width: number, height: number },
+    //direction: 'clockwise' | 'counterclockwise' // always clockwise for now
+  },
+  newOutput: [Array<Array<DIGIT>>],
+}
+
+export type FlipStep = {
+  action: 'flip',
+  matrixIndex: number, // 1 to 4
+  options: {
+    position: Position,
+    size: { width: number, height: number },
+    direction: 'horizontal' | 'vertical'
+  },
+  newOutput: [Array<Array<DIGIT>>],
+}
+
+export type ProjectStep = {
+  action: 'project' | 'project-force',
+  matrixIndex: number, // 1 to 4
+  options: {
+    position: Position,
+    size: { width: number, height: number },
+    direction: 'up' | 'down' | 'left' | 'right'
+  },
+  newOutput: [Array<Array<DIGIT>>],
+}
+
 export type CopyStep = {
   action: 'copy',
   options: {
@@ -47,4 +80,4 @@ export type FillStep = {
   newOutput: [Array<Array<DIGIT>>],
 }
 
-export type Step = ResizeStep | CopyStep | ClearStep | FillStep;
+export type Step = ResizeStep | CopyStep | ClearStep | FillStep | RotateStep | FlipStep | ProjectStep;
