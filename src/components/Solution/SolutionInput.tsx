@@ -58,8 +58,8 @@ export default function SolutionInput({ input, inputIndex }: SolutionInputProps)
               y={i * UNIT}
               width={UNIT}
               height={UNIT}
-              fill={COLOR_MAP[cell] || "#ffffff"}
-              stroke="#000000"
+              fill={COLOR_MAP[cell] || "#000000ff"}
+              stroke="#fbfafaff"
               strokeWidth={1}
               onMouseDown={() => { if (selectedCell.mode === "select") {
                 setStartPosition({ x: j, y: i })

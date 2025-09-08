@@ -56,6 +56,8 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
       setStep([...step, newStep]);
     }
   }
+
+  // Select:Ctrl+c/v=copy/paste, r=rotate, h/v=flip, arrow=project, ctrl+arrow=force project
   const handleChangeInput = (e: KeyboardEvent) => {
     const isCtrlOrCmd = e.ctrlKey || e.metaKey;
     if (isCtrlOrCmd && e.key === 'c' && startPosition && endPosition && selectedCell.mode === "select") {
@@ -328,8 +330,8 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
               y={i * UNIT}
               width={UNIT}
               height={UNIT}
-              fill={COLOR_MAP[cell] || "#ffffff"}
-              stroke="#000000"
+              fill={COLOR_MAP[cell] || "#000000ff"}
+              stroke="#fbfafaff"
               strokeWidth={1}
               onClick={() => handleOnClick(i, j)}
               onMouseDown={() => { if (selectedCell.mode === "select") {
