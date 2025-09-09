@@ -27,7 +27,7 @@ export default function ResizeInput({ matrixIndex }: { matrixIndex: number }) {
       setError(null);
     }
 
-    const newOutputMatrix: Array<Array<DIGIT>> = Array.from({ length: newRows }, (_, _i) => Array.from({ length: newCols }, (_, _j) => "-1" as DIGIT ));
+    const newOutputMatrix: Array<Array<DIGIT>> = Array.from({ length: newRows }, (_, _i) => Array.from({ length: newCols }, (_, _j) => 0 as DIGIT ));
     const oldRows = outputSolution[matrixIndex].length;
     const oldCols = outputSolution[matrixIndex][0].length;
 
@@ -65,14 +65,11 @@ export default function ResizeInput({ matrixIndex }: { matrixIndex: number }) {
         action: 'copy',
         options: {
           from: {
-            source: 'input',
-            matrixIndex: matrixIndex,
-            position: { x: 0, y: 0 },
+            position: { x: 0, y: 0, source: 'input', matrixIndex },
             size: { width: newOutputMatrix[0].length, height: newOutputMatrix.length },
           },
           to: {
-            matrixIndex: matrixIndex,
-            position: { x: 0, y: 0 }
+            position: { x: 0, y: 0, source: 'output', matrixIndex }
           }
         },
         newOutput 
@@ -90,11 +87,8 @@ export default function ResizeInput({ matrixIndex }: { matrixIndex: number }) {
     const newStep: ClearStep = {
       action: 'clear',
       matrixIndex,
-      options: {
-        size: { width: cols, height: rows },
-      },
       newOutput
-    }
+    };
     setStep([...step, newStep]);
     handleChangeOutputSolution(newOutput);
   }
@@ -103,7 +97,7 @@ export default function ResizeInput({ matrixIndex }: { matrixIndex: number }) {
     const newOutputSolution = cloneDeep(outputSolution);
     newOutputSolution[matrixIndex] = cloneDeep(DEFAULT_SOLUTION_MATRIX);
     handleChangeOutputSolution(newOutputSolution);
-    setStep([]);
+    // setStep([]);
   }
 
   return (

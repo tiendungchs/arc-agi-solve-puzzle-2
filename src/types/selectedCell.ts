@@ -1,15 +1,11 @@
 import type { DIGIT } from "../const"
+import type { Position } from "./position"
+import type { Size } from "./size"
 
 export type SelectedCell = {
   mode: "edit" | "select" | "fill",
   color: DIGIT,
-  position?: {
-    x: number,
-    y: number,
-    source: 'input' | 'output',
-    matrixIndex: number,
-    sx: number,
-    sy: number,
-    isCopy: boolean
-  }
+  position?: Position,
+  size?: Size,
+  isCopied: boolean
 }

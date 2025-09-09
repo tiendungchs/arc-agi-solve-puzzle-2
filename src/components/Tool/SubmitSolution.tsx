@@ -2,14 +2,20 @@ import { Box, Button, Typography } from "@mui/material";
 import { useContext } from "react";
 import { AppContext, type AppContextProps } from "../Context/AppContext";
 import { compareValue } from "../../utils/compareValue";
+import type { DIGIT } from "../../const";
 
 
 export default function SubmitSolution() {
-  const { outputSolution, trainingSolution, choosenTrainingId, step, error, setError } = useContext<AppContextProps>(AppContext);
+  const { outputSolution, trainingSolution, choosenTrainingId, step, isCorrect, setIsCorrect } = useContext<AppContextProps>(AppContext);
   const handleSubmit = () => {
-    const isCorrect = Boolean(choosenTrainingId && compareValue(outputSolution, trainingSolution?.[choosenTrainingId] || []));
-    setError(isCorrect);
-  } 
+    if (!choosenTrainingId) {
+      return;
+    }
+    // convert [ Array<Array<DIGIT>> ] to Array<Array<Array<DIGIT>>>
+    const solution = trainingSolution?.[choosenTrainingId] as Array<Array<Array<DIGIT>>>;
+    const isCorrect = Boolean(choosenTrainingId && compareValue(outputSolution, solution));
+    setIsCorrect(isCorrect);
+  }
 
   const handleDownloadStep = () => {
     const result = {
@@ -31,15 +37,15 @@ export default function SubmitSolution() {
       <Button variant="contained" color="primary" onClick={handleSubmit}>
         Submit Solution
       </Button>
-      {error !== null && (
-        error === true ? 
+      {isCorrect !== null && (
+        isCorrect === true ? 
         <Typography variant="body1" color="success.main" marginTop={2}>
           Correct Solution!
         </Typography> :
         <Typography variant="body1" color="error.main" marginTop={2}>
           Incorrect Solution!
         </Typography>)}
-      {error !== null && (error === true && <Box marginTop={2}>
+      {isCorrect !== null && (isCorrect === true && <Box marginTop={2}>
         <Typography variant="h6">4. Steps taken:</Typography>
         <Button variant="outlined" color="primary" onClick={handleDownloadStep}>
           Download Steps (check console)

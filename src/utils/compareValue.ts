@@ -1,7 +1,7 @@
 import { zip } from "lodash";
 import type { DIGIT } from "../const";
 
-export const compareValue = (sourceArray: [Array<Array<DIGIT>>] | null, targetArray: [Array<Array<DIGIT>>] | []) => {
+export const compareValue = (sourceArray: Array<Array<Array<DIGIT>>> | null, targetArray: Array<Array<Array<DIGIT>>> | []) => {
   for (const [source, target] of zip(sourceArray, targetArray)) {
     if (!source || !target || source.length !== target.length) return false;
 

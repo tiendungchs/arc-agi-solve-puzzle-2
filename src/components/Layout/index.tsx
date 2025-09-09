@@ -15,7 +15,7 @@ type LayoutProps = {
 export default function Layout({ id }: LayoutProps) {
   const { trainingData, handleChangeInputSolution } = useContext<AppContextProps>(AppContext);
   const inputSolution = useMemo(() => 
-    trainingData?.[id].test.map(item => item.input) as [Array<Array<DIGIT>>] || [],
+    trainingData?.[id].test.map(item => item.input) as Array<Array<Array<DIGIT>>> || [],
     [trainingData, id]
   );
 
@@ -29,10 +29,11 @@ export default function Layout({ id }: LayoutProps) {
         <Example examples={trainingData?.[id].train ?? []} />
       </Grid>
       <Grid size={7}>
-        {trainingData?.[id].test?.map((_testItem, index) => (
+        {/* Solution and Tool components for each test item */}
+        {inputSolution.map((_matrix, index) => (
           <Box key={index} marginBottom={2}>
             <Solution inputSolution={inputSolution} inputIndex={index} />
-          <Tool matrixIndex={index} />
+            <Tool matrixIndex={index} />
           </Box>
         ))}
         <Box marginBottom={2}>

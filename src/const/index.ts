@@ -40,5 +40,6 @@ export const DEFAULT_SOLUTION_MATRIX: Array<Array<DIGIT>> = [
 
 export const DEFAULT_SELECTED_CELL: SelectedCell = {
   mode: "edit",
-  color: 0 as DIGIT
+  color: 0 as DIGIT,
+  isCopied: false
 } 

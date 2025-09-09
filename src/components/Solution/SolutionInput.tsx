@@ -28,7 +28,7 @@ export default function SolutionInput({ input, inputIndex }: SolutionInputProps)
       const y = Math.min(startPosition.y, endPosition.y);
       const sx = Math.abs(startPosition.x - endPosition.x) + 1;
       const sy = Math.abs(startPosition.y - endPosition.y) + 1;
-      handleChangeSelectedCell({...selectedCell, position: { x, y, sx, sy, source: 'input', matrixIndex: inputIndex, isCopy: true } });
+      handleChangeSelectedCell({...selectedCell, position: {x, y, source: 'input', matrixIndex: inputIndex}, size: { width: sx, height: sy }, isCopied: true });
     }
   }
 
@@ -38,7 +38,7 @@ export default function SolutionInput({ input, inputIndex }: SolutionInputProps)
       window.removeEventListener('keydown', handleKeydown);
     };
   }, [startPosition, endPosition]);
-
+  
   useEffect(() => {
     if (selectedCell.mode !== "select") {
       setCurrentPosition(null);
@@ -62,22 +62,22 @@ export default function SolutionInput({ input, inputIndex }: SolutionInputProps)
               stroke="#fbfafaff"
               strokeWidth={1}
               onMouseDown={() => { if (selectedCell.mode === "select") {
-                setStartPosition({ x: j, y: i })
+                setStartPosition({ x: j, y: i, source: 'input', matrixIndex: inputIndex })
                 setCurrentPosition(null)
                 setEndPosition(null) 
               }}}
               onMouseUp={() => { if (selectedCell.mode === "select") {
-                setEndPosition({ x: j, y: i })
+                setEndPosition({ x: j, y: i, source: 'input', matrixIndex: inputIndex })
                 if (startPosition) {
                   const x = Math.min(startPosition.x, j);
                   const y = Math.min(startPosition.y, i);
                   const sx = Math.abs(startPosition.x - j) + 1;
                   const sy = Math.abs(startPosition.y - i) + 1;
-                  handleChangeSelectedCell({...selectedCell, position: { x, y, sx, sy, source: 'input', matrixIndex: inputIndex, isCopy: false } });
+                  handleChangeSelectedCell({...selectedCell, position: {x, y, source: 'input', matrixIndex: inputIndex}, size: { width: sx, height: sy }, isCopied: false });
                 }
               } }}
-              onMouseOver={() => { if (startPosition && !endPosition) setCurrentPosition({ x: j, y: i }) }}
-              opacity={!selectedCell.position?.isCopy && selectedCell.position?.source === 'input' && startPosition && currentPosition && isBetweenPosition(startPosition, currentPosition, { x: j, y: i }) ? 0.5 : 1}
+              onMouseOver={() => { if (startPosition && !endPosition) setCurrentPosition({ x: j, y: i, source: 'input', matrixIndex: inputIndex }) }}
+              opacity={!selectedCell.isCopied && selectedCell.position?.source === 'input' && startPosition && currentPosition && isBetweenPosition(startPosition, currentPosition, { x: j, y: i, source: 'input', matrixIndex: inputIndex }) ? 0.5 : 1}
             />
           ))
         )}
