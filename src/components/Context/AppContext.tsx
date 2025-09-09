@@ -7,6 +7,8 @@ import type { Step } from "../../types/step";
 
 
 export type AppContextProps = {
+  redoStep: Step[],
+  setRedoStep: (step: Step[]) => void,
   isCorrect: boolean | null,
   setIsCorrect: (isCorrect: boolean | null) => void,
   error: boolean | null,
@@ -29,6 +31,8 @@ export type AppContextProps = {
 }
 
 export const AppContext = createContext<AppContextProps>({
+  redoStep: [],
+  setRedoStep: () => {},
   isCorrect: null,
   setIsCorrect: () => {},
   error: null,
@@ -51,6 +55,7 @@ export const AppContext = createContext<AppContextProps>({
 });
 
 export default function AppContextProvider({ children }: PropsWithChildren) {
+  const [redoStep, setRedoStep] = useState<Step[]>([]);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [trainingData, setTrainingData] = useState<TrainingData | null>(null);
   const [trainingSolution, setTrainingSolution] = useState<TrainingSolutionData | null>(null);
@@ -78,7 +83,7 @@ export default function AppContextProvider({ children }: PropsWithChildren) {
   };
 
   return (
-    <AppContext.Provider value={{ trainingData, setTrainingData, listTrainingId, choosenTrainingId, handleChangeChoosenTrainingId, outputSolution, handleChangeOutputSolution, inputSolution, handleChangeInputSolution, selectedCell, handleChangeSelectedCell, trainingSolution, setTrainingSolution, step, setStep, error, setError, isCorrect, setIsCorrect }}>
+    <AppContext.Provider value={{ trainingData, setTrainingData, listTrainingId, choosenTrainingId, handleChangeChoosenTrainingId, outputSolution, handleChangeOutputSolution, inputSolution, handleChangeInputSolution, selectedCell, handleChangeSelectedCell, trainingSolution, setTrainingSolution, step, setStep, error, setError, isCorrect, setIsCorrect, redoStep, setRedoStep }}>
       {children}
     </AppContext.Provider>
   );

@@ -7,7 +7,7 @@ import type { ClearStep, CopyStep, ResizeStep } from "../../types/step";
 
 
 export default function ResizeInput({ matrixIndex }: { matrixIndex: number }) {
-  const { outputSolution, handleChangeOutputSolution, inputSolution, setStep, step } = useContext<AppContextProps>(AppContext);
+  const { outputSolution, handleChangeOutputSolution, inputSolution, setStep, step, redoStep, setRedoStep } = useContext<AppContextProps>(AppContext);
   const rows = outputSolution[matrixIndex].length;
   const cols = outputSolution[matrixIndex][0].length;
   const [size, setSize] = useState<string>(`${cols}x${rows}`);
@@ -80,6 +80,48 @@ export default function ResizeInput({ matrixIndex }: { matrixIndex: number }) {
     }
   }
 
+  const handleUndo = () => {
+    // Create a copy to avoid direct mutation
+    const newStep = [...step];
+    const popStep = newStep.pop();
+    
+    if (popStep) {
+      // Update redoStep with the popped item
+      setRedoStep([popStep, ...redoStep]);
+      
+      // Update output with the previous state
+      const newOutput = popStep.newOutput;
+      handleChangeOutputSolution(newOutput);
+      
+      // Update step with the new array (without the popped item)
+      setStep(newStep);
+    }
+    else {
+      const newOutput = cloneDeep([DEFAULT_SOLUTION_MATRIX] as Array<Array<Array<DIGIT>>>);
+      handleChangeOutputSolution(newOutput);
+      // setStep([]);
+    }
+  }
+  
+  const handleRedo = () => {
+    if (redoStep.length > 0) {
+      // Create a copy and get the first item
+      const newRedoStep = [...redoStep];
+      const popStep = newRedoStep.shift();
+      
+      if (popStep) {
+        // Add the item to step
+        setStep([...step, popStep]);
+        
+        // Update output
+        handleChangeOutputSolution(popStep.newOutput);
+        
+        // Update redoStep without the shifted item
+        setRedoStep(newRedoStep);
+      }
+    }
+  }
+
   const handleClear = () => {
     const newOutputMatrix: Array<Array<DIGIT>> = Array.from({ length: rows }, (_, _i) => Array.from({ length: cols }, (_, _j) => 0 as DIGIT ));
     const newOutput = cloneDeep(outputSolution);
@@ -100,6 +142,8 @@ export default function ResizeInput({ matrixIndex }: { matrixIndex: number }) {
     // setStep([]);
   }
 
+  
+
   return (
     <Box>
       <Typography variant="h6" marginBottom={1}>1. Configure your output grid:</Typography>
@@ -114,7 +158,9 @@ export default function ResizeInput({ matrixIndex }: { matrixIndex: number }) {
         <Box display='flex' flexDirection='row'>
           <Button variant="contained" size="small" sx={{ marginRight: 1 }} onClick={handleCopyFromInput}>Copy from input</Button>
           <Button variant="contained" size="small" sx={{ marginRight: 1 }} onClick={handleClear}>Clear</Button>
-          <Button variant="contained" size="small" onClick={handleReset}>Reset</Button>
+          <Button variant="contained" size="small" sx={{ marginRight: 1 }} onClick={handleReset}>Reset</Button>
+          <Button variant="contained" size="small" sx={{ marginRight: 1 }} onClick={handleUndo}>Undo</Button>
+          <Button variant="contained" size="small" onClick={handleRedo}>Redo</Button>
         </Box>
       </Box>
     </Box>
