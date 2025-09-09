@@ -76,21 +76,21 @@ export default function ResizeInput({ matrixIndex }: { matrixIndex: number }) {
       };
       handleChangeOutputSolution(newOutput);
       setStep([...step, newStep]);
-      setSize(`${newOutput[0].length}x${newOutput.length}`);
+      setSize(`${newOutput[matrixIndex][0].length}x${newOutput[matrixIndex].length}`);
     }
-  }
+  };
 
   const handleUndo = () => {
     // Create a copy to avoid direct mutation
     const newStep = [...step];
     const popStep = newStep.pop();
-    
+
     if (popStep) {
       // Update redoStep with the popped item
       setRedoStep([popStep, ...redoStep]);
       
       // Update output with the previous state
-      const newOutput = popStep.newOutput;
+      const newOutput = newStep.at(-1)?.newOutput || [DEFAULT_SOLUTION_MATRIX] as Array<Array<Array<DIGIT>>>;
       handleChangeOutputSolution(newOutput);
       
       // Update step with the new array (without the popped item)
@@ -99,7 +99,7 @@ export default function ResizeInput({ matrixIndex }: { matrixIndex: number }) {
     else {
       const newOutput = cloneDeep([DEFAULT_SOLUTION_MATRIX] as Array<Array<Array<DIGIT>>>);
       handleChangeOutputSolution(newOutput);
-      // setStep([]);
+      setStep([]);
     }
   }
   
@@ -136,10 +136,10 @@ export default function ResizeInput({ matrixIndex }: { matrixIndex: number }) {
   }
 
   const handleReset = () => {
-    const newOutputSolution = cloneDeep(outputSolution);
-    newOutputSolution[matrixIndex] = cloneDeep(DEFAULT_SOLUTION_MATRIX);
-    handleChangeOutputSolution(newOutputSolution);
-    // setStep([]);
+    const newOutput = cloneDeep(outputSolution);
+    newOutput[matrixIndex] = cloneDeep(DEFAULT_SOLUTION_MATRIX);
+    handleChangeOutputSolution(newOutput);
+    setStep([]);
   }
 
   

@@ -1,39 +1,40 @@
 import { Box, Button, Typography } from "@mui/material";
-// import { COLOR_MAP, type DIGIT } from "../../const";
+import { COLOR_MAP, type DIGIT } from "../../const";
 import { useContext } from "react";
 import { AppContext, type AppContextProps } from "../Context/AppContext";
-// import type { FillStep } from "../../types/step";
+import type { FillStep } from "../../types/step";
 
 
 export default function EditOutputGridCell({ matrixIndex }: { matrixIndex: number }) {
 
   const { selectedCell, handleChangeSelectedCell, handleChangeOutputSolution, outputSolution, step, setStep } = useContext<AppContextProps>(AppContext);
   
-  // const handleClick = (index: DIGIT) => {
-  //   if (selectedCell.mode === "select" && selectedCell.position) {
-  //     const { x, y, source } = selectedCell.position;
-  //     const sx = selectedCell.size?.width || 1;
-  //     const sy = selectedCell.size?.height || 1;
-  //     if (source === "output") {
-  //       for (let i = x; i < x + sx; i++) {
-  //         for (let j = y; j < y + sy; j++) {
-  //           outputSolution[matrixIndex][j][i] = index;
-  //         }
-  //       }
-  //       const newStep: FillStep = {
-  //         action: 'fill',
-  //         options: {
-  //           position: { x, y, source: 'output', matrixIndex },
-  //           color: index
-  //         },
-  //         newOutput: [...outputSolution]
-  //       };
-  //       setStep([...step, newStep]);
-  //       handleChangeOutputSolution([...outputSolution]);
-  //     }
-  //   }
-  //   handleChangeSelectedCell({ ...selectedCell, color: index });
-  // }
+  const handleClick = (index: DIGIT) => {
+    if (selectedCell.mode === "select" && selectedCell.position) {
+      const { x, y, source } = selectedCell.position;
+      const sx = selectedCell.size?.width || 1;
+      const sy = selectedCell.size?.height || 1;
+      if (source === "output") {
+        for (let i = x; i < x + sx; i++) {
+          for (let j = y; j < y + sy; j++) {
+            outputSolution[matrixIndex][j][i] = index;
+          }
+        }
+        const newStep: FillStep = {
+          action: 'fill',
+          options: {
+            position: { x, y, source: 'output', matrixIndex },
+            color: index,
+            size: { width: sx, height: sy }
+          },
+          newOutput: [...outputSolution]
+        };
+        setStep([...step, newStep]);
+        handleChangeOutputSolution([...outputSolution]);
+      }
+    }
+    handleChangeSelectedCell({ ...selectedCell, color: index });
+  }
 
   return (
     <Box>
@@ -43,13 +44,13 @@ export default function EditOutputGridCell({ matrixIndex }: { matrixIndex: numbe
         <Button variant="contained" size="small" sx={{ marginRight: 1 }} onClick={() => handleChangeSelectedCell({ ...selectedCell, mode: "select" })} color={selectedCell.mode === "select" ? "primary" : "inherit"}>Select</Button>
         <Button variant="contained" size="small" sx={{ marginRight: 1 }} onClick={() => handleChangeSelectedCell({ ...selectedCell, mode: "fill", position: undefined })} color={selectedCell.mode === "fill" ? "primary" : "inherit"}>Fill</Button>
       </Box>
-      {/* <Box display="flex" flexDirection="row">
+      <Box display="flex" flexDirection="row">
         {Array.from({ length: 10 }, (_, index) => (
           <Box key={index} marginRight={0.5} onClick={() => handleClick(index as DIGIT)} sx={{ cursor: "pointer", border: selectedCell.color === index ? "2px solid #000000" : "2px solid transparent", borderRadius: 1 }}>
             <Box width={32} height={32} bgcolor={COLOR_MAP[index as DIGIT]} position="relative" />
           </Box>
         ))}
-      </Box> */}
+      </Box>
     </Box>
   );
 }

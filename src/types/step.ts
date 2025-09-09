@@ -65,7 +65,8 @@ export type FillStep = {
   action: 'fill' | 'dot',
   options: {
     position: Position,
-    color: DIGIT
+    color: DIGIT,
+    size?: Size, // only for 'fill' action
   },
   newOutput: Array<Array<Array<DIGIT>>>,
 }

@@ -4,7 +4,7 @@ import { Layer, Rect, Stage } from "react-konva";
 import { COLOR_MAP, UNIT, type DIGIT } from "../../const";
 import { type Position } from "../../types/position";
 import { isBetweenPosition } from "../../utils/isBetween";
-import { cloneDeep, set } from "lodash"
+import { cloneDeep } from "lodash"
 import { boundaryFill } from "../../utils/boundaryFill";
 import { projectRect } from "../../utils/projectRect";
 import type { CopyStep, FillStep, FlipStep, ProjectStep, RotateStep } from "../../types/step";
@@ -26,15 +26,17 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
     // Handle cell click
     setSelectedPos({x: j, y: i, source: 'output', matrixIndex: outputIndex});
     if (selectedCell.mode === "edit") {
-      outputSolution[outputIndex][i][j] = selectedCell.color;
-      handleChangeOutputSolution([...outputSolution]);
+      const newOutputSolution = cloneDeep(outputSolution);
+      newOutputSolution[outputIndex][i][j] = selectedCell.color;
+      handleChangeOutputSolution([...newOutputSolution]);
       const newStep: FillStep = {
         action: 'dot',
         options: {
           position: { x: j, y: i, source: 'output', matrixIndex: outputIndex },
-          color: selectedCell.color
+          color: selectedCell.color,
+          size: { width: 1, height: 1 }
         },
-        newOutput: [...outputSolution]
+        newOutput: [...newOutputSolution]
       };
       setStep([...step, newStep]);
     }
@@ -46,7 +48,7 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
         action: 'fill',
         options: {
           position: { x: j, y: i, source: 'output', matrixIndex: outputIndex },
-          color: selectedCell.color
+          color: selectedCell.color,
         },
         newOutput: [...outputSolution]
       };

@@ -6,6 +6,7 @@ import Layout from './components/Layout';
 import { Autocomplete, Box, TextField, Typography } from '@mui/material';
 import type { TrainingSolutionData } from './types/trainingSolutionData';
 import { DEFAULT_SOLUTION_MATRIX, type DIGIT } from './const';
+import { cloneDeep } from 'lodash';
 
 function App() {
   const { trainingData, setTrainingData, handleChangeChoosenTrainingId, choosenTrainingId, listTrainingId, setTrainingSolution, setStep, setIsCorrect, handleChangeOutputSolution } = useContext<AppContextProps>(AppContext);
@@ -63,7 +64,7 @@ function App() {
               handleChangeChoosenTrainingId(newValue);
               setStep([]);
               setIsCorrect(null);
-              handleChangeOutputSolution(Array.from({ length: newValue ? (trainingData?.[newValue].test.length || 1) : 1 }, () => DEFAULT_SOLUTION_MATRIX) as [Array<Array<DIGIT>>]);
+              handleChangeOutputSolution(Array.from({ length: newValue ? (trainingData?.[newValue].test.length || 1) : 1 }, () => cloneDeep(DEFAULT_SOLUTION_MATRIX)) as [Array<Array<DIGIT>>]);
             }}
             renderInput={(params) => <TextField {...params} label="Select Training ID" />}
           />
