@@ -26,8 +26,9 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
     // Handle cell click
     setSelectedPos({x: j, y: i, source: 'output', matrixIndex: outputIndex});
     if (selectedCell.mode === "edit") {
-      outputSolution[outputIndex][i][j] = selectedCell.color;
-      handleChangeOutputSolution([...outputSolution]);
+      const newOutputSolution = cloneDeep(outputSolution);
+      newOutputSolution[outputIndex][i][j] = selectedCell.color;
+      handleChangeOutputSolution(newOutputSolution);
       const newStep: FillStep = {
         action: 'fill',
         options: {
@@ -35,14 +36,15 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
           size: {width: 1, height: 1},
           color: selectedCell.color
         },
-        newOutput: [...outputSolution]
+        newOutput: newOutputSolution
       };
       setStep([...step, newStep]);
     }
     else if (selectedCell.mode === "fill") {
       const currentColor = outputSolution[outputIndex][i][j];
-      boundaryFill(i, j, currentColor, selectedCell.color, outputSolution[outputIndex]);
-      handleChangeOutputSolution([...outputSolution]);
+      const newOutputSolution = cloneDeep(outputSolution);
+      boundaryFill(j, i, currentColor, selectedCell.color, newOutputSolution[outputIndex]);
+      handleChangeOutputSolution(newOutputSolution);
       const newStep: FillStep = {
         action: 'fill-boundary',
         options: {
@@ -50,7 +52,7 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
           size: {width: 1, height: 1},
           color: selectedCell.color
         },
-        newOutput: [...outputSolution]
+        newOutput: newOutputSolution
       };
       setStep([...step, newStep]);
     }
@@ -83,8 +85,8 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
       const sy = selectedCell.size ? selectedCell.size.height : 1;
 
       if (source === 'input' && inputSolution) {
-        const minDeltaRows = Math.min(sx, newRows - selectedPos.x);
-        const minDeltaCols = Math.min(sy, newCols - selectedPos.y);
+        const minDeltaRows = Math.min(sx, newRows - selectedPos.y);
+        const minDeltaCols = Math.min(sy, newCols - selectedPos.x);
         for (let i = 0; i < minDeltaRows; i++) {
           for (let j = 0; j < minDeltaCols; j++) {
             newOutput[outputIndex][selectedPos.y + j][selectedPos.x + i] = inputSolution[matrixIndex][y + j][x + i];
@@ -95,8 +97,8 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
         setEndPosition({ x: selectedPos.x + minDeltaRows - 1, y: selectedPos.y + minDeltaCols - 1, source: 'output', matrixIndex: outputIndex });
       }
       else if (source === 'output') {
-        const minDeltaRows = Math.min(sx, newRows - selectedPos.x);
-        const minDeltaCols = Math.min(sy, newCols - selectedPos.y);
+        const minDeltaRows = Math.min(sx, newRows - selectedPos.y);
+        const minDeltaCols = Math.min(sy, newCols - selectedPos.x);
         for (let i = 0; i < minDeltaRows; i++) {
           for (let j = 0; j < minDeltaCols; j++) {
             newOutput[outputIndex][selectedPos.y + j][selectedPos.x + i] = outputSolution[matrixIndex][y + j][x + i];
@@ -355,7 +357,7 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
                   const y = Math.min(startPosition.y, i);
                   const sx = Math.abs(startPosition.x - j) + 1;
                   const sy = Math.abs(startPosition.y - i) + 1;
-                  if (startPosition.x != j && startPosition.y != i) {
+                  if (startPosition.x != j || startPosition.y != i) {
                     handleChangeSelectedCell({...selectedCell, position: { x, y, source: 'output', matrixIndex: outputIndex }, size: { width: sx, height: sy }, isCopied: false });
                   }
               }}}}

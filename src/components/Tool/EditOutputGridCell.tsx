@@ -3,6 +3,7 @@ import { COLOR_MAP, type DIGIT } from "../../const";
 import { useContext } from "react";
 import { AppContext, type AppContextProps } from "../Context/AppContext";
 import type { FillStep } from "../../types/step";
+import { cloneDeep } from "lodash";
 
 
 export default function EditOutputGridCell({ matrixIndex }: { matrixIndex: number }) {
@@ -11,13 +12,14 @@ export default function EditOutputGridCell({ matrixIndex }: { matrixIndex: numbe
   
   const handleClick = (index: DIGIT) => {
     if (selectedCell.mode === "select" && selectedCell.position) {
+      const newOutputSolution = cloneDeep(outputSolution);
       const { x, y, source } = selectedCell.position;
       const sx = selectedCell.size?.width || 1;
       const sy = selectedCell.size?.height || 1;
       if (source === "output") {
         for (let i = x; i < x + sx; i++) {
           for (let j = y; j < y + sy; j++) {
-            outputSolution[matrixIndex][j][i] = index;
+            newOutputSolution[matrixIndex][j][i] = index;
           }
         }
         const newStep: FillStep = {
@@ -27,10 +29,10 @@ export default function EditOutputGridCell({ matrixIndex }: { matrixIndex: numbe
             size: {width: sx, height: sy},
             color: index
           },
-          newOutput: [...outputSolution]
+          newOutput: newOutputSolution
         };
         setStep([...step, newStep]);
-        handleChangeOutputSolution([...outputSolution]);
+        handleChangeOutputSolution(newOutputSolution);
       }
     }
     handleChangeSelectedCell({ ...selectedCell, color: index });
