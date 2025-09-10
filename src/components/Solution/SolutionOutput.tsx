@@ -26,17 +26,16 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
     // Handle cell click
     setSelectedPos({x: j, y: i, source: 'output', matrixIndex: outputIndex});
     if (selectedCell.mode === "edit") {
-      const newOutputSolution = cloneDeep(outputSolution);
-      newOutputSolution[outputIndex][i][j] = selectedCell.color;
-      handleChangeOutputSolution([...newOutputSolution]);
+      outputSolution[outputIndex][i][j] = selectedCell.color;
+      handleChangeOutputSolution([...outputSolution]);
       const newStep: FillStep = {
-        action: 'dot',
+        action: 'fill',
         options: {
           position: { x: j, y: i, source: 'output', matrixIndex: outputIndex },
-          color: selectedCell.color,
-          size: { width: 1, height: 1 }
+          size: {width: 1, height: 1},
+          color: selectedCell.color
         },
-        newOutput: [...newOutputSolution]
+        newOutput: [...outputSolution]
       };
       setStep([...step, newStep]);
     }
@@ -45,10 +44,10 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
       boundaryFill(i, j, currentColor, selectedCell.color, outputSolution[outputIndex]);
       handleChangeOutputSolution([...outputSolution]);
       const newStep: FillStep = {
-        action: 'fill',
+        action: 'fill-boundary',
         options: {
           position: { x: j, y: i, source: 'output', matrixIndex: outputIndex },
-          color: selectedCell.color,
+          color: selectedCell.color
         },
         newOutput: [...outputSolution]
       };
@@ -350,7 +349,7 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
                   }
               }}}}
               onMouseOver={() => { if (startPosition && !endPosition) setCurrentPosition({ x: j, y: i, source: 'output', matrixIndex: outputIndex }) }}
-              opacity={!selectedCell?.isCopied && selectedCell.position?.source === 'output' && startPosition && currentPosition && isBetweenPosition(startPosition, currentPosition, { x: j, y: i, source: 'output', matrixIndex: outputIndex }) ? 0.5 : 1}
+              opacity={!selectedCell?.isCopied && selectedCell.position?.source === 'output' && startPosition && ( currentPosition && isBetweenPosition(startPosition, currentPosition, { x: j, y: i, source: 'output', matrixIndex: outputIndex }) || endPosition && isBetweenPosition(startPosition, endPosition, { x: j, y: i, source: 'output', matrixIndex: outputIndex })) ? 0.5 : 1}
             />
           ))
         )}
@@ -358,5 +357,3 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
     </Stage>
   );
 }
-
-

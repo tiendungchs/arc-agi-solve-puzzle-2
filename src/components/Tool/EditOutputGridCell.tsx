@@ -24,8 +24,8 @@ export default function EditOutputGridCell({ matrixIndex }: { matrixIndex: numbe
           action: 'fill',
           options: {
             position: { x, y, source: 'output', matrixIndex },
-            color: index,
-            size: { width: sx, height: sy }
+            size: {width: sx, height: sy},
+            color: index
           },
           newOutput: [...outputSolution]
         };

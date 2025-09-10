@@ -4,7 +4,6 @@ import { DEFAULT_SELECTED_CELL, DEFAULT_SOLUTION_MATRIX, type DIGIT } from "../.
 import type { SelectedCell } from "../../types/selectedCell";
 import type { TrainingSolutionData } from "../../types/trainingSolutionData";
 import type { Step } from "../../types/step";
-import { cloneDeep } from "lodash";
 
 
 export type AppContextProps = {
@@ -62,7 +61,7 @@ export default function AppContextProvider({ children }: PropsWithChildren) {
   const [trainingSolution, setTrainingSolution] = useState<TrainingSolutionData | null>(null);
   const [error, setError] = useState<boolean | null>(null);
   const [step, setStep] = useState<Step[]>([]);
-  const [outputSolution, setOutputSolution] = useState<Array<Array<Array<DIGIT>>>>(cloneDeep([DEFAULT_SOLUTION_MATRIX]));
+  const [outputSolution, setOutputSolution] = useState<Array<Array<Array<DIGIT>>>>([DEFAULT_SOLUTION_MATRIX]);
   const listTrainingId = useMemo(() => Object.keys(trainingData || {}).map(key => key), [trainingData]);
   const [choosenTrainingId, setChoosenTrainingId] = useState<string | null>(null);
   const [inputSolution, setInputSolution] = useState<Array<Array<Array<DIGIT>>> | undefined>(undefined);
