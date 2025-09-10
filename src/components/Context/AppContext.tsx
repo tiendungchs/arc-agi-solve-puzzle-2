@@ -4,6 +4,8 @@ import { DEFAULT_SELECTED_CELL, DEFAULT_SOLUTION_MATRIX, type DIGIT } from "../.
 import type { SelectedCell } from "../../types/selectedCell";
 import type { TrainingSolutionData } from "../../types/trainingSolutionData";
 import type { Step } from "../../types/step";
+import { cloneDeep } from "lodash"
+
 
 
 export type AppContextProps = {

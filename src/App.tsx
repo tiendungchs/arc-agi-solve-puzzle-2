@@ -5,7 +5,7 @@ import { type AppContextProps, AppContext } from './components/Context/AppContex
 import Layout from './components/Layout';
 import { Autocomplete, Box, TextField, Typography } from '@mui/material';
 import type { TrainingSolutionData } from './types/trainingSolutionData';
-import { DEFAULT_SOLUTION_MATRIX, type DIGIT } from './const';
+import { DEFAULT_SOLUTION_MATRIX } from './const';
 
 function App() {
   const { trainingData, setTrainingData, handleChangeChoosenTrainingId, choosenTrainingId, listTrainingId, setTrainingSolution, setStep, setIsCorrect, handleChangeOutputSolution } = useContext<AppContextProps>(AppContext);
