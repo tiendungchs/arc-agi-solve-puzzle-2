@@ -1,11 +1,12 @@
 import type { DIGIT } from "../const"
 import type { Position } from "./position"
+import type { Size } from "./size"
 
 export type ResizeStep = {
   action: 'resize',
+  matrixIndex: number, // 1 to 4
   options: {
-    z: number,
-    size: { width: number, height: number },
+    size: Size,
   },
   newOutput: Array<Array<Array<DIGIT>>>,
 }
@@ -14,7 +15,7 @@ export type RotateStep = {
   action: 'rotate',
   options: {
     position: Position,
-    size: { width: number, height: number },
+    size: Size,
     //direction: 'clockwise' | 'counterclockwise' // always clockwise for now
   },
   newOutput: Array<Array<Array<DIGIT>>>,
@@ -24,7 +25,7 @@ export type FlipStep = {
   action: 'flip',
   options: {
     position: Position,
-    size: { width: number, height: number },
+    size: Size,
     direction: 'horizontal' | 'vertical'
   },
   newOutput: Array<Array<Array<DIGIT>>>,
@@ -34,7 +35,7 @@ export type ProjectStep = {
   action: 'project' | 'project-force',
   options: {
     position: Position,
-    size: { width: number, height: number },
+    size: Size,
     direction: 'up' | 'down' | 'left' | 'right'
   },
   newOutput: Array<Array<Array<DIGIT>>>,
@@ -44,9 +45,8 @@ export type CopyStep = {
   action: 'copy',
   options: {
     from: {
-      source: 'input' | 'output',
       position: Position,
-      size: { width: number, height: number },
+      size: Size,
     },
     to: {
       position: Position
@@ -57,18 +57,15 @@ export type CopyStep = {
 
 export type ClearStep = {
   action: 'clear',
-  options: {
-    z: number,
-    size: { width: number, height: number },
-  },
+  matrixIndex: number, // 1 to 4
   newOutput: Array<Array<Array<DIGIT>>>,
 }
 
 export type FillStep = {
-  action: 'fill',
+  action: 'fill' | 'fill-boundary',
   options: {
     position: Position,
-    size?: { width: number, height: number },
+    size?: Size,
     color: DIGIT
   },
   newOutput: Array<Array<Array<DIGIT>>>,

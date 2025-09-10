@@ -4,7 +4,7 @@ import SolutionOutput from "./SolutionOutput"
 import type { DIGIT } from "../../const"
 
 type SolutionProps = {
-  inputSolution?: [Array<Array<DIGIT>>],
+  inputSolution?: Array<Array<Array<DIGIT>>>,
   inputIndex: number
 }
 

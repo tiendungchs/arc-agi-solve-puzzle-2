@@ -3,19 +3,20 @@ import { AppContext, type AppContextProps } from "../Context/AppContext";
 import { useContext, useEffect, useMemo } from "react";
 import Example from "../Example";
 import type { TrainingData } from "../../types/trainingData";
-import type { DIGIT } from "../../const";
 import Solution from "../Solution";
 import Tool from "../Tool";
+import SubmitSolution from "../Tool/SubmitSolution";
+import type { DIGIT } from "../../const";
 
 type LayoutProps = {
   id: keyof TrainingData
 }
 
 export default function Layout({ id }: LayoutProps) {
-  const { trainingData, handleChangeInputSolution, choosenTrainingId } = useContext<AppContextProps>(AppContext);
+  const { trainingData, handleChangeInputSolution } = useContext<AppContextProps>(AppContext);
   const inputSolution = useMemo(() => 
-    choosenTrainingId ? trainingData?.[choosenTrainingId].test.map(item => item.input)[0] as Array<Array<DIGIT>> || [] : [],
-    [trainingData, choosenTrainingId]
+    trainingData?.[id].test.map(item => item.input) as Array<Array<Array<DIGIT>>> || [],
+    [trainingData, id]
   );
 
   useEffect(() => {
@@ -28,10 +29,16 @@ export default function Layout({ id }: LayoutProps) {
         <Example examples={trainingData?.[id].train ?? []} />
       </Grid>
       <Grid size={7}>
+        {/* Solution and Tool components for each test item */}
+        {inputSolution.map((_matrix, index) => (
+          <Box key={index} marginBottom={2}>
+            <Solution inputSolution={inputSolution} inputIndex={index} />
+            <Tool matrixIndex={index} />
+          </Box>
+        ))}
         <Box marginBottom={2}>
-          <Solution inputSolution={inputSolution ? [inputSolution] : undefined} inputIndex={0} />
-          <Tool />
-        </Box>
+        <SubmitSolution />
+      </Box>
       </Grid>
     </Grid>
   );
