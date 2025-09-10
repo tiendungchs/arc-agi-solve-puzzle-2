@@ -65,7 +65,7 @@ export type FillStep = {
   action: 'fill' | 'fill-boundary',
   options: {
     position: Position,
-    size?: Size,
+    size: Size,
     color: DIGIT
   },
   newOutput: Array<Array<Array<DIGIT>>>,

@@ -47,6 +47,7 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
         action: 'fill-boundary',
         options: {
           position: { x: j, y: i, source: 'output', matrixIndex: outputIndex },
+          size: {width: 1, height: 1},
           color: selectedCell.color
         },
         newOutput: [...outputSolution]
