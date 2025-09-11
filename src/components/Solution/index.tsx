@@ -16,11 +16,11 @@ export default function Solution({ inputSolution, inputIndex }: SolutionProps) {
     <Grid container>
       <Grid size={5}>
         <Typography variant="h6" marginBottom={1}>Input</Typography>
-        <SolutionInput input={input} />
+        <SolutionInput input={input} inputIndex={inputIndex} />
       </Grid>
       <Grid size={7}>
         <Typography variant="h6" marginBottom={1}>Output</Typography>
-        <SolutionOutput />
+        <SolutionOutput outputIndex={inputIndex} />
       </Grid>
     </Grid>
   )

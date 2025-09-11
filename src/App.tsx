@@ -5,10 +5,11 @@ import { type AppContextProps, AppContext } from './components/Context/AppContex
 import Layout from './components/Layout';
 import { Autocomplete, Box, TextField, Typography } from '@mui/material';
 import type { TrainingSolutionData } from './types/trainingSolutionData';
-import { DEFAULT_SOLUTION_MATRIX, type DIGIT } from './const';
+import { DEFAULT_SELECTED_CELL, DEFAULT_SOLUTION_MATRIX } from './const';
+import { cloneDeep } from 'lodash';
 
 function App() {
-  const { trainingData, setTrainingData, handleChangeChoosenTrainingId, choosenTrainingId, listTrainingId, setTrainingSolution, setStep, setIsCorrect, handleChangeOutputSolution } = useContext<AppContextProps>(AppContext);
+  const { trainingData, setTrainingData, handleChangeChoosenTrainingId, choosenTrainingId, listTrainingId, setTrainingSolution, setStep, setIsCorrect, handleChangeOutputSolution, handleChangeSelectedCell } = useContext<AppContextProps>(AppContext);
   const handleFileChange = (newFile: File | null) => {
     if (newFile) {
       const reader = new FileReader();
@@ -63,6 +64,7 @@ function App() {
               handleChangeChoosenTrainingId(newValue);
               setStep([]);
               setIsCorrect(null);
+              handleChangeSelectedCell(cloneDeep(DEFAULT_SELECTED_CELL));
               handleChangeOutputSolution(Array.from({ length: newValue ? (trainingData?.[newValue].test.length || 1) : 1 }, () => DEFAULT_SOLUTION_MATRIX));
             }}
             renderInput={(params) => <TextField {...params} label="Select Training ID" />}

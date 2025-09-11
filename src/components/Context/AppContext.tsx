@@ -4,9 +4,18 @@ import { DEFAULT_SELECTED_CELL, DEFAULT_SOLUTION_MATRIX, type DIGIT } from "../.
 import type { SelectedCell } from "../../types/selectedCell";
 import type { TrainingSolutionData } from "../../types/trainingSolutionData";
 import type { Step } from "../../types/step";
+import { cloneDeep } from "lodash"
+import type { Position } from "../../types/position";
+
 
 
 export type AppContextProps = {
+  startPosition: Position | null,
+  setStartPosition: (position: Position | null) => void,
+  currentPosition: Position | null,
+  setCurrentPosition: (position: Position | null) => void,
+  endPosition: Position | null,
+  setEndPosition: (position: Position | null) => void,
   redoStep: Step[],
   setRedoStep: (step: Step[]) => void,
   isCorrect: boolean | null,
@@ -31,6 +40,12 @@ export type AppContextProps = {
 }
 
 export const AppContext = createContext<AppContextProps>({
+  startPosition: null,
+  setStartPosition: () => {},
+  currentPosition: null,
+  setCurrentPosition: () => {},
+  endPosition: null,
+  setEndPosition: () => {},
   redoStep: [],
   setRedoStep: () => {},
   isCorrect: null,
@@ -55,6 +70,9 @@ export const AppContext = createContext<AppContextProps>({
 });
 
 export default function AppContextProvider({ children }: PropsWithChildren) {
+  const [startPosition, setStartPosition] = useState<Position | null>(null);
+  const [currentPosition, setCurrentPosition] = useState<Position | null>(null);
+  const [endPosition, setEndPosition] = useState<Position | null>(null);
   const [redoStep, setRedoStep] = useState<Step[]>([]);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [trainingData, setTrainingData] = useState<TrainingData | null>(null);
@@ -83,7 +101,7 @@ export default function AppContextProvider({ children }: PropsWithChildren) {
   };
 
   return (
-    <AppContext.Provider value={{ trainingData, setTrainingData, listTrainingId, choosenTrainingId, handleChangeChoosenTrainingId, outputSolution, handleChangeOutputSolution, inputSolution, handleChangeInputSolution, selectedCell, handleChangeSelectedCell, trainingSolution, setTrainingSolution, step, setStep, error, setError, isCorrect, setIsCorrect, redoStep, setRedoStep }}>
+    <AppContext.Provider value={{ trainingData, setTrainingData, listTrainingId, choosenTrainingId, handleChangeChoosenTrainingId, outputSolution, handleChangeOutputSolution, inputSolution, handleChangeInputSolution, selectedCell, handleChangeSelectedCell, trainingSolution, setTrainingSolution, step, setStep, error, setError, isCorrect, setIsCorrect, redoStep, setRedoStep, startPosition, setStartPosition, currentPosition, setCurrentPosition, endPosition, setEndPosition }}>
       {children}
     </AppContext.Provider>
   );
