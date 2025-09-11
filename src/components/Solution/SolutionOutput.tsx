@@ -93,7 +93,7 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
           }
         }
         // The new selectedCell is now the newly pasted area
-        handleChangeSelectedCell({...selectedCell, position: { x: selectedPos.x, y: selectedPos.y, source: 'output', matrixIndex: outputIndex }, size: { width: minDeltaRows, height: minDeltaCols }, isCopied: false });
+        handleChangeSelectedCell({...selectedCell, position: { x: selectedPos.x, y: selectedPos.y, source: 'output', matrixIndex: outputIndex }, size: { width: minDeltaCols, height: minDeltaRows }, isCopied: false });
         setEndPosition({ x: selectedPos.x + minDeltaCols - 1, y: selectedPos.y + minDeltaRows - 1, source: 'output', matrixIndex: outputIndex });
       }
       else if (source === 'output') {
@@ -105,7 +105,7 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
           }
         }
         // The new selectedCell is now the newly pasted area
-        handleChangeSelectedCell({...selectedCell, position: { x: selectedPos.x, y: selectedPos.y, source: 'output', matrixIndex: outputIndex }, size: { width: minDeltaRows, height: minDeltaCols }, isCopied: false });
+        handleChangeSelectedCell({...selectedCell, position: { x: selectedPos.x, y: selectedPos.y, source: 'output', matrixIndex: outputIndex }, size: { width: minDeltaCols, height: minDeltaRows }, isCopied: false });
         setEndPosition({ x: selectedPos.x + minDeltaCols - 1, y: selectedPos.y + minDeltaRows - 1, source: 'output', matrixIndex: outputIndex });
       }
 
@@ -136,16 +136,16 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
       }
       const newOutput = cloneDeep(outputSolution);
       // Create a temporary matrix to hold the rotated values
-      const tempMatrix = Array.from({ length: sx }, () => Array.from({ length: sy }, () => 0 as DIGIT ));
+      const tempMatrix = Array.from({ length: sx }, () => Array.from({ length: sx }, () => 0 as DIGIT ));
       for (let i = 0; i < sx; i++) {
-        for (let j = 0; j < sy; j++) {
+        for (let j = 0; j < sx; j++) {
           tempMatrix[i][j] = outputSolution[outputIndex][y + i][x + j];
         }
       }
       
       // Rotate 90 degree clockwise and copy to newOutput
       for (let i = 0; i < sx; i++) {
-        for (let j = 0; j < sy; j++) {
+        for (let j = 0; j < sx; j++) {
           newOutput[outputIndex][y + i][x + j] = tempMatrix[sy - 1 - j][i];
         }
       }
