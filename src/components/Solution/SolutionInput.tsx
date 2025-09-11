@@ -1,8 +1,7 @@
 import { Layer, Rect, Stage } from "react-konva";
 import { COLOR_MAP, UNIT, type DIGIT } from "../../const";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { AppContext, type AppContextProps } from "../Context/AppContext";
-import type { Position } from "../../types/position";
 import { isBetweenPosition } from "../../utils/isBetween";
 
 export type SolutionInputProps = {
@@ -12,18 +11,14 @@ export type SolutionInputProps = {
 
 export default function SolutionInput({ input, inputIndex }: SolutionInputProps) {
 
-  const { selectedCell, handleChangeSelectedCell } = useContext<AppContextProps>(AppContext);
+  const {startPosition, setStartPosition, currentPosition, setCurrentPosition, endPosition, setEndPosition,selectedCell, handleChangeSelectedCell } = useContext<AppContextProps>(AppContext);
 
   const rows = input.length;
   const cols = input[0].length;
 
-  const [startPosition, setStartPosition] = useState<Position | null>(null);
-  const [currentPosition, setCurrentPosition] = useState<Position | null>(null);
-  const [endPosition, setEndPosition] = useState<Position | null>(null);
-
   const handleKeydown = (e: KeyboardEvent) => {
     const isCtrlOrCmd = e.ctrlKey || e.metaKey;
-    if (isCtrlOrCmd && e.key === 'c' && startPosition && endPosition && selectedCell.mode === "select") {
+    if (isCtrlOrCmd && e.key === 'c' && startPosition && endPosition && selectedCell.mode === "select" && selectedCell.position?.source === 'input' && selectedCell.position?.matrixIndex === inputIndex) {
       const x = Math.min(startPosition.x, endPosition.x);
       const y = Math.min(startPosition.y, endPosition.y);
       const sx = Math.abs(startPosition.x - endPosition.x) + 1;
@@ -68,7 +63,7 @@ export default function SolutionInput({ input, inputIndex }: SolutionInputProps)
               }}}
               onMouseUp={() => { if (selectedCell.mode === "select") {
                 setEndPosition({ x: j, y: i, source: 'input', matrixIndex: inputIndex })
-                if (startPosition) {
+                if (startPosition && startPosition.source === 'input' && startPosition.matrixIndex === inputIndex) {
                   const x = Math.min(startPosition.x, j);
                   const y = Math.min(startPosition.y, i);
                   const sx = Math.abs(startPosition.x - j) + 1;

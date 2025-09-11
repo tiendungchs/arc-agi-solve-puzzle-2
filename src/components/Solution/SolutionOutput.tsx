@@ -12,14 +12,10 @@ import { projectRectForce } from "../../utils/projectRectForce";
 
 export default function SolutionOutput({ outputIndex }: { outputIndex: number }) {
 
-  const { outputSolution, selectedCell, handleChangeOutputSolution, handleChangeSelectedCell, inputSolution, step, setStep, choosenTrainingId } = useContext<AppContextProps>(AppContext);
+  const { startPosition, setStartPosition, currentPosition, setCurrentPosition, endPosition, setEndPosition, outputSolution, selectedCell, handleChangeOutputSolution, handleChangeSelectedCell, inputSolution, step, setStep, choosenTrainingId } = useContext<AppContextProps>(AppContext);
   const [selectedPos, setSelectedPos] = useState<Position | null>(null);
   const rows = outputSolution[outputIndex].length;
   const cols = outputSolution[outputIndex][0].length;
-
-  const [startPosition, setStartPosition] = useState<Position | null>(null);
-  const [currentPosition, setCurrentPosition] = useState<Position | null>(null);
-  const [endPosition, setEndPosition] = useState<Position | null>(null);
 
 
   const handleOnClick = (i: number, j: number) => {
@@ -357,8 +353,9 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
                   const y = Math.min(startPosition.y, i);
                   const sx = Math.abs(startPosition.x - j) + 1;
                   const sy = Math.abs(startPosition.y - i) + 1;
-                  if (startPosition.x != j || startPosition.y != i) {
+                  if ((startPosition.x != j || startPosition.y != i) && startPosition.matrixIndex === outputIndex && startPosition.source === 'output') {
                     handleChangeSelectedCell({...selectedCell, position: { x, y, source: 'output', matrixIndex: outputIndex }, size: { width: sx, height: sy }, isCopied: false });
+                    console.log("Selected cell:", {selectedCell});
                   }
               }}}}
               onMouseOver={() => { if (startPosition && !endPosition) setCurrentPosition({ x: j, y: i, source: 'output', matrixIndex: outputIndex }) }}
