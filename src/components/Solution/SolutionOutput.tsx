@@ -85,28 +85,28 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
       const sy = selectedCell.size ? selectedCell.size.height : 1;
 
       if (source === 'input' && inputSolution) {
-        const minDeltaRows = Math.min(sx, newRows - selectedPos.y);
-        const minDeltaCols = Math.min(sy, newCols - selectedPos.x);
+        const minDeltaRows = Math.min(sy, newRows - selectedPos.y);
+        const minDeltaCols = Math.min(sx, newCols - selectedPos.x);
         for (let i = 0; i < minDeltaRows; i++) {
           for (let j = 0; j < minDeltaCols; j++) {
-            newOutput[outputIndex][selectedPos.y + j][selectedPos.x + i] = inputSolution[matrixIndex][y + j][x + i];
+            newOutput[outputIndex][selectedPos.y + i][selectedPos.x + j] = inputSolution[matrixIndex][y + i][x + j];
           }
         }
         // The new selectedCell is now the newly pasted area
         handleChangeSelectedCell({...selectedCell, position: { x: selectedPos.x, y: selectedPos.y, source: 'output', matrixIndex: outputIndex }, size: { width: minDeltaRows, height: minDeltaCols }, isCopied: false });
-        setEndPosition({ x: selectedPos.x + minDeltaRows - 1, y: selectedPos.y + minDeltaCols - 1, source: 'output', matrixIndex: outputIndex });
+        setEndPosition({ x: selectedPos.x + minDeltaCols - 1, y: selectedPos.y + minDeltaRows - 1, source: 'output', matrixIndex: outputIndex });
       }
       else if (source === 'output') {
-        const minDeltaRows = Math.min(sx, newRows - selectedPos.y);
-        const minDeltaCols = Math.min(sy, newCols - selectedPos.x);
+        const minDeltaRows = Math.min(sy, newRows - selectedPos.y);
+        const minDeltaCols = Math.min(sx, newCols - selectedPos.x);
         for (let i = 0; i < minDeltaRows; i++) {
           for (let j = 0; j < minDeltaCols; j++) {
-            newOutput[outputIndex][selectedPos.y + j][selectedPos.x + i] = outputSolution[matrixIndex][y + j][x + i];
+            newOutput[outputIndex][selectedPos.y + i][selectedPos.x + j] = outputSolution[matrixIndex][y + i][x + j];
           }
         }
         // The new selectedCell is now the newly pasted area
         handleChangeSelectedCell({...selectedCell, position: { x: selectedPos.x, y: selectedPos.y, source: 'output', matrixIndex: outputIndex }, size: { width: minDeltaRows, height: minDeltaCols }, isCopied: false });
-        setEndPosition({ x: selectedPos.x + minDeltaRows - 1, y: selectedPos.y + minDeltaCols - 1, source: 'output', matrixIndex: outputIndex });
+        setEndPosition({ x: selectedPos.x + minDeltaCols - 1, y: selectedPos.y + minDeltaRows - 1, source: 'output', matrixIndex: outputIndex });
       }
 
       const newStep: CopyStep = {
