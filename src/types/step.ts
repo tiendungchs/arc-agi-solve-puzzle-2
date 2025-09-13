@@ -76,7 +76,7 @@ export type ClearStep = {
 }
 
 export type FillStep = {
-  action: 'fill' | 'fill-boundary',
+  action: 'fill' | 'fill-boundary' | 'fill-soft',
   options: {
     position: Position,
     size: Size,

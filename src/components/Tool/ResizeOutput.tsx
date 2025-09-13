@@ -57,21 +57,25 @@ export default function ResizeInput({ matrixIndex }: { matrixIndex: number }) {
   const handleCopyFromInput = () => {
     // Implement copy from input logic
     if (inputSolution) {
-      const newOutputMatrix = cloneDeep(inputSolution[matrixIndex]);
-      const newOutput = cloneDeep(outputSolution);
-      newOutput[matrixIndex] = newOutputMatrix;
-      
+      const newRows = inputSolution[matrixIndex].length;
+      const newCols = inputSolution[matrixIndex][0].length;
+      const newOutputMatrix1 = Array.from({ length: newRows }, () => Array.from({ length: newCols }, () => 0 as DIGIT )); // create a new matrix of size : newRows x newCols
+      const newOutput1 = cloneDeep(outputSolution);
+      newOutput1[matrixIndex] = newOutputMatrix1;
       //Create a resize step
       const newStep1: ResizeStep = {
         action: 'resize',
         matrixIndex,
         options: {
-          size: { width: newOutputMatrix[0].length, height: newOutputMatrix.length },
+          size: { width: newOutputMatrix1[0].length, height: newOutputMatrix1.length },
         },
-        newOutput 
+        newOutput: newOutput1
       };
       setStep([...step, newStep1]);
 
+      const newOutputMatrix = cloneDeep(inputSolution[matrixIndex]);
+      const newOutput = cloneDeep(outputSolution);
+      newOutput[matrixIndex] = newOutputMatrix;
       // Create a copy step
       const newStep: CopyStep = {
         action: 'copy',

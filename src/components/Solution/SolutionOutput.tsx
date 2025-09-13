@@ -218,7 +218,7 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
       const sy = selectedCell.size?.height || 1;
       const newOutput = cloneDeep(outputSolution);
       // Create a temporary matrix to hold the flipped values
-      const tempMatrix = Array.from({ length: sx }, () => Array.from({ length: sy }, () => 0 as DIGIT ));
+      const tempMatrix = Array.from({ length: sy }, () => Array.from({ length: sx }, () => 0 as DIGIT ));
       for (let i = 0; i < sy; i++) {
         for (let j = 0; j < sx; j++) {
           tempMatrix[i][j] = outputSolution[outputIndex][y + i][x + j];
@@ -249,7 +249,7 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
       const sy = selectedCell.size?.height || 1;
       const newOutput = cloneDeep(outputSolution);
       // Create a temporary matrix to hold the flipped values
-      const tempMatrix = Array.from({ length: sx }, () => Array.from({ length: sy }, () => 0 as DIGIT ));
+      const tempMatrix = Array.from({ length: sy }, () => Array.from({ length: sx }, () => 0 as DIGIT ));
       for (let i = 0; i < sy; i++) {
         for (let j = 0; j < sx; j++) {
           tempMatrix[i][j] = outputSolution[outputIndex][y + i][x + j];

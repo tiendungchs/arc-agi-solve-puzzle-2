@@ -9,8 +9,8 @@ import { cloneDeep } from "lodash";
 export default function EditOutputGridCell({ matrixIndex }: { matrixIndex: number }) {
 
   const { selectedCell, handleChangeSelectedCell, handleChangeOutputSolution, outputSolution, step, setStep } = useContext<AppContextProps>(AppContext);
-  
-  const handleClick = (index: DIGIT) => {
+
+  const handleClick = (index: DIGIT, isFillSoft: boolean) => {
     if (selectedCell.mode === "select" && selectedCell.position) {
       const newOutputSolution = cloneDeep(outputSolution);
       const { x, y, source } = selectedCell.position;
@@ -19,7 +19,7 @@ export default function EditOutputGridCell({ matrixIndex }: { matrixIndex: numbe
       if (source === "output") {
         for (let i = x; i < x + sx; i++) {
           for (let j = y; j < y + sy; j++) {
-            newOutputSolution[matrixIndex][j][i] = index;
+            newOutputSolution[matrixIndex][j][i] = (newOutputSolution[matrixIndex][j][i] === 0 && isFillSoft) ? 0 : index;
           }
         }
         const newStep: FillStep = {
@@ -48,10 +48,19 @@ export default function EditOutputGridCell({ matrixIndex }: { matrixIndex: numbe
       </Box>
       <Box display="flex" flexDirection="row">
         {Array.from({ length: 10 }, (_, index) => (
-          <Box key={index} marginRight={0.5} onClick={() => handleClick(index as DIGIT)} sx={{ cursor: "pointer", border: selectedCell.color === index ? "2px solid #000000" : "2px solid transparent", borderRadius: 1 }}>
+          <Box key={index} marginRight={0.5} onClick={() => handleClick(index as DIGIT, false)} sx={{ cursor: "pointer", border: selectedCell.color === index ? "2px solid #000000" : "2px solid transparent", borderRadius: 1 }}>
             <Box width={32} height={32} bgcolor={COLOR_MAP[index as DIGIT]} position="relative" />
           </Box>
         ))}
+      </Box>
+      <Box display="flex" flexDirection="row" marginTop={2}>
+        {Array.from({ length: 10 }, (_, index) => (
+          <Box key={index} marginRight={0.5} onClick={() => handleClick(index as DIGIT, true)} sx={{ cursor: "pointer", border: selectedCell.color === index ? "2px solid #000000" : "2px solid transparent", borderRadius: 1 }}>
+            {/* Soft fill, grid with lower opacity */}
+            <Box width={32} height={32} bgcolor={COLOR_MAP[index as DIGIT]} position="relative" sx={{ opacity: 0.6 }} />
+          </Box>
+        ))}
+        <Typography variant="body2" marginRight={1}>Soft Fill (doesn't fill empty cells):</Typography>
       </Box>
     </Box>
   );
