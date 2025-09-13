@@ -60,6 +60,18 @@ export default function ResizeInput({ matrixIndex }: { matrixIndex: number }) {
       const newOutputMatrix = cloneDeep(inputSolution[matrixIndex]);
       const newOutput = cloneDeep(outputSolution);
       newOutput[matrixIndex] = newOutputMatrix;
+      
+      //Create a resize step
+      const newStep1: ResizeStep = {
+        action: 'resize',
+        matrixIndex,
+        options: {
+          size: { width: newOutputMatrix[0].length, height: newOutputMatrix.length },
+        },
+        newOutput 
+      };
+      setStep([...step, newStep1]);
+
       // Create a copy step
       const newStep: CopyStep = {
         action: 'copy',

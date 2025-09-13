@@ -41,6 +41,20 @@ export type ProjectStep = {
   newOutput: Array<Array<Array<DIGIT>>>,
 }
 
+export type MatchStep = {
+  action: 'match',
+  options: {
+    from: {
+      position: Position,
+      size: Size,
+    },
+    to: {
+      position: Position
+    }
+  },
+  newOutput: Array<Array<Array<DIGIT>>>,
+}
+
 export type CopyStep = {
   action: 'copy',
   options: {
@@ -71,4 +85,4 @@ export type FillStep = {
   newOutput: Array<Array<Array<DIGIT>>>,
 }
 
-export type Step = ResizeStep | CopyStep | ClearStep | FillStep | RotateStep | FlipStep | ProjectStep;
+export type Step = ResizeStep | CopyStep | ClearStep | FillStep | RotateStep | FlipStep | ProjectStep | MatchStep;
