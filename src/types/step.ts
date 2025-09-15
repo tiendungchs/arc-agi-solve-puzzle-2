@@ -36,7 +36,7 @@ export type ProjectStep = {
   options: {
     position: Position,
     size: Size,
-    direction: 'up' | 'down' | 'left' | 'right'
+    direction: 'up' | 'down' | 'left' | 'right' | 'north' | 'south' | 'east' | 'west'
   },
   newOutput: Array<Array<Array<DIGIT>>>,
 }

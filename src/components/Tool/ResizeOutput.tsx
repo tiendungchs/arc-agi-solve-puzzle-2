@@ -59,7 +59,7 @@ export default function ResizeInput({ matrixIndex }: { matrixIndex: number }) {
     if (inputSolution) {
       const newRows = inputSolution[matrixIndex].length;
       const newCols = inputSolution[matrixIndex][0].length;
-      const newOutputMatrix1 = Array.from({ length: newRows }, () => Array.from({ length: newCols }, () => 0 as DIGIT )); // create a new matrix of size : newRows x newCols
+      const newOutputMatrix1 = Array.from({ length: newRows }, () => Array.from({ length: newCols }, () => 0 as DIGIT )); // create a new empty matrix of size : newRows x newCols
       const newOutput1 = cloneDeep(outputSolution);
       newOutput1[matrixIndex] = newOutputMatrix1;
       //Create a resize step
@@ -67,11 +67,10 @@ export default function ResizeInput({ matrixIndex }: { matrixIndex: number }) {
         action: 'resize',
         matrixIndex,
         options: {
-          size: { width: newOutputMatrix1[0].length, height: newOutputMatrix1.length },
+          size: { width: newCols, height: newRows },
         },
         newOutput: newOutput1
       };
-      setStep([...step, newStep1]);
 
       const newOutputMatrix = cloneDeep(inputSolution[matrixIndex]);
       const newOutput = cloneDeep(outputSolution);
@@ -82,7 +81,7 @@ export default function ResizeInput({ matrixIndex }: { matrixIndex: number }) {
         options: {
           from: {
             position: { x: 0, y: 0, source: 'input', matrixIndex },
-            size: { width: newOutputMatrix[0].length, height: newOutputMatrix.length },
+            size: { width: newCols, height: newRows },
           },
           to: {
             position: { x: 0, y: 0, source: 'output', matrixIndex }
@@ -90,9 +89,11 @@ export default function ResizeInput({ matrixIndex }: { matrixIndex: number }) {
         },
         newOutput 
       };
+      
+      // Register both steps in the correct order
+      setStep([...step, newStep1, newStep]);
       handleChangeOutputSolution(newOutput);
-      setStep([...step, newStep]);
-      setSize(`${newOutput[matrixIndex][0].length}x${newOutput[matrixIndex].length}`);
+      setSize(`${newCols}x${newRows}`);
     }
   }
 

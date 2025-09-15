@@ -9,6 +9,7 @@ import { boundaryFill } from "../../utils/boundaryFill";
 import { projectRect } from "../../utils/projectRect";
 import type { CopyStep, FillStep, FlipStep, ProjectStep, RotateStep } from "../../types/step";
 import { projectRectForce } from "../../utils/projectRectForce";
+import { projectLine } from "../../utils/projectLine";
 
 export default function SolutionOutput({ outputIndex }: { outputIndex: number }) {
 
@@ -316,6 +317,37 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
         setStep([...step, newStep]);
       }
     }
+    // check if conition
+    // diagonally project the selected line up-right, down-left, up-left, down-right (north, south, east, west)
+    if (['n', 's', 'e', 'w'].includes(e.key) && selectedCell.mode === "select" && selectedCell.position && selectedCell.position.source === 'output' && selectedCell.position.matrixIndex === outputIndex && !selectedCell.isCopied && selectedCell.size && (selectedCell.size.width === 1 || selectedCell.size.height === 1)) {
+      const directionMap: { [key: string]: 'north' | 'south' | 'east' | 'west' } = {
+        'n': 'north',
+        's': 'south',
+        'e': 'east',
+        'w': 'west'
+      };
+      const direction = directionMap[e.key];
+      if (direction) {
+        const { x, y } = selectedCell.position;
+        const sx = selectedCell.size?.width || 1;
+        const sy = selectedCell.size?.height || 1;
+        const newOutput = cloneDeep(outputSolution);
+        // project directly on the matrix
+        projectLine(newOutput[outputIndex], {x, y}, {width: sx, height: sy}, direction);
+        handleChangeOutputSolution(newOutput);
+        const newStep: ProjectStep = {
+          action: 'project',
+          options: {
+            position: { x, y, source: 'output', matrixIndex: outputIndex },
+            size: { width: sx, height: sy },
+            direction
+          },
+          newOutput
+        };
+        setStep([...step, newStep]);
+      }
+    }
+
     // force project the selected area up, down, left, right, using project-pen
     if (isCtrlOrCmd && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key) && selectedCell.mode === "select" && selectedCell.position && !selectedCell.isCopied) {
       const directionMap: { [key: string]: 'up' | 'down' | 'left' | 'right' } = {
@@ -410,7 +442,6 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
                   const sy = Math.abs(startPosition.y - i) + 1;
                   if ((startPosition.x != j || startPosition.y != i) && startPosition.matrixIndex === outputIndex && startPosition.source === 'output') {
                     handleChangeSelectedCell({...selectedCell, position: { x, y, source: 'output', matrixIndex: outputIndex }, size: { width: sx, height: sy }, isCopied: false });
-                    console.log("Selected cell:", {selectedCell});
                   }
               }}}}
               onMouseOver={() => { if (startPosition && !endPosition) setCurrentPosition({ x: j, y: i, source: 'output', matrixIndex: outputIndex }) }}
