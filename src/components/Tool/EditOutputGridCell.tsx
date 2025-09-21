@@ -1,6 +1,6 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Checkbox, Typography } from "@mui/material";
 import { COLOR_MAP, type DIGIT } from "../../const";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { AppContext, type AppContextProps } from "../Context/AppContext";
 import type { FillStep } from "../../types/step";
 import { cloneDeep } from "lodash";
@@ -9,8 +9,10 @@ import { cloneDeep } from "lodash";
 export default function EditOutputGridCell({ matrixIndex }: { matrixIndex: number }) {
 
   const { selectedCell, handleChangeSelectedCell, handleChangeOutputSolution, outputSolution, step, setStep } = useContext<AppContextProps>(AppContext);
+  const [targetColor, setTargetColor] = useState<DIGIT | 0>(0);
+  const [isFillAll, setIsFillAll] = useState<boolean>(false);
 
-  const handleClick = (index: DIGIT, isFillSoft: boolean) => {
+  const handleClick = (color: DIGIT) => {
     if (selectedCell.mode === "select" && selectedCell.position) {
       const newOutputSolution = cloneDeep(outputSolution);
       const { x, y, source } = selectedCell.position;
@@ -19,7 +21,10 @@ export default function EditOutputGridCell({ matrixIndex }: { matrixIndex: numbe
       if (source === "output") {
         for (let i = x; i < x + sx; i++) {
           for (let j = y; j < y + sy; j++) {
-            newOutputSolution[matrixIndex][j][i] = (newOutputSolution[matrixIndex][j][i] === 0 && isFillSoft) ? 0 : index;
+            if (newOutputSolution[matrixIndex][j][i] !== targetColor && !isFillAll) {
+              continue;
+            }
+            newOutputSolution[matrixIndex][j][i] = color;
           }
         }
         const newStep: FillStep = {
@@ -27,7 +32,9 @@ export default function EditOutputGridCell({ matrixIndex }: { matrixIndex: numbe
           options: {
             position: { x, y, source: 'output', matrixIndex },
             size: {width: sx, height: sy},
-            color: index
+            color,
+            targetColor,
+            isFillAll,
           },
           newOutput: newOutputSolution
         };
@@ -35,7 +42,7 @@ export default function EditOutputGridCell({ matrixIndex }: { matrixIndex: numbe
         handleChangeOutputSolution(newOutputSolution);
       }
     }
-    handleChangeSelectedCell({ ...selectedCell, color: index });
+    handleChangeSelectedCell({ ...selectedCell, color });
   }
 
   return (
@@ -48,19 +55,20 @@ export default function EditOutputGridCell({ matrixIndex }: { matrixIndex: numbe
       </Box>
       <Box display="flex" flexDirection="row">
         {Array.from({ length: 10 }, (_, index) => (
-          <Box key={index} marginRight={0.5} onClick={() => handleClick(index as DIGIT, false)} sx={{ cursor: "pointer", border: selectedCell.color === index ? "2px solid #000000" : "2px solid transparent", borderRadius: 1 }}>
+          <Box key={index} marginRight={0.5} onClick={() => handleClick(index as DIGIT)} sx={{ cursor: "pointer", border: selectedCell.color === index ? "2px solid #000000" : "2px solid transparent", borderRadius: 1 }}>
             <Box width={32} height={32} bgcolor={COLOR_MAP[index as DIGIT]} position="relative" />
           </Box>
         ))}
       </Box>
-      <Box display="flex" flexDirection="row" marginTop={2}>
+      <Typography  variant="body2">Target Color:</Typography>
+      <Box display="flex" flexDirection="row">
         {Array.from({ length: 10 }, (_, index) => (
-          <Box key={index} marginRight={0.5} onClick={() => handleClick(index as DIGIT, true)} sx={{ cursor: "pointer", border: selectedCell.color === index ? "2px solid #000000" : "2px solid transparent", borderRadius: 1 }}>
-            {/* Soft fill, grid with lower opacity */}
+          <Box key={index} marginRight={0.5} onClick={() => setTargetColor(index as DIGIT)} sx={{ cursor: "pointer", border: targetColor === index ? "2px solid #000000" : "2px solid transparent", borderRadius: 1 }}>
             <Box width={32} height={32} bgcolor={COLOR_MAP[index as DIGIT]} position="relative" sx={{ opacity: 0.6 }} />
           </Box>
         ))}
-        <Typography variant="body2" marginRight={1}>Soft Fill (doesn't fill empty cells):</Typography>
+        <Typography variant="body2">/Replace All Colors:</Typography>
+        <Checkbox checked={isFillAll} onChange={(e) => setIsFillAll(e.target.checked)} />
       </Box>
     </Box>
   );

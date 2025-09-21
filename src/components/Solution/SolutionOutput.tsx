@@ -24,6 +24,7 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
     setSelectedPos({x: j, y: i, source: 'output', matrixIndex: outputIndex});
     if (selectedCell.mode === "edit") {
       const newOutputSolution = cloneDeep(outputSolution);
+      const targetColor = newOutputSolution[outputIndex][i][j];
       newOutputSolution[outputIndex][i][j] = selectedCell.color;
       handleChangeOutputSolution(newOutputSolution);
       const newStep: FillStep = {
@@ -31,7 +32,9 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
         options: {
           position: { x: j, y: i, source: 'output', matrixIndex: outputIndex },
           size: {width: 1, height: 1},
-          color: selectedCell.color
+          color: selectedCell.color,
+          targetColor,
+          isFillAll: true,
         },
         newOutput: newOutputSolution
       };
@@ -40,6 +43,7 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
     else if (selectedCell.mode === "fill") {
       const currentColor = outputSolution[outputIndex][i][j];
       const newOutputSolution = cloneDeep(outputSolution);
+      const targetColor = newOutputSolution[outputIndex][i][j];
       boundaryFill(j, i, currentColor, selectedCell.color, newOutputSolution[outputIndex]);
       handleChangeOutputSolution(newOutputSolution);
       const newStep: FillStep = {
@@ -47,7 +51,9 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
         options: {
           position: { x: j, y: i, source: 'output', matrixIndex: outputIndex },
           size: {width: 1, height: 1},
-          color: selectedCell.color
+          color: selectedCell.color,
+          targetColor,
+          isFillAll: false
         },
         newOutput: newOutputSolution
       };
@@ -55,7 +61,7 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
     }
   }
 
-  // Select:Ctrl+c/v=copy/paste, r=rotate, h/v=flip, arrow=project, ctrl+arrow=force project, m=match
+  // Select:Ctrl+c/v=copy/paste, r=rotate, h/v=flip, arrow=project (up, down, left, right. rectangle area selected), n=project north, s=project south, e=project east, w=project west (on selected line), ctrl+arrow=force project, m=match
   const handleChangeInput = (e: KeyboardEvent) => {
     // Escape key to cancel selection
     if (e.key === 'Escape' && selectedCell.mode === "select") {

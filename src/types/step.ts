@@ -76,11 +76,13 @@ export type ClearStep = {
 }
 
 export type FillStep = {
-  action: 'fill' | 'fill-boundary' | 'fill-soft',
+  action: 'fill' | 'fill-boundary',
   options: {
     position: Position,
     size: Size,
-    color: DIGIT
+    color: DIGIT,
+    targetColor: DIGIT,
+    isFillAll: boolean,
   },
   newOutput: Array<Array<Array<DIGIT>>>,
 }
