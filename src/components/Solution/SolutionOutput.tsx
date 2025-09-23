@@ -167,7 +167,7 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
       }
 
       const newStep: CopyStep = {
-        action: 'copy',
+        action: 'match',
         options: {
           from: {
             position: { x, y, source, matrixIndex },

@@ -11,7 +11,19 @@ export default function EditOutputGridCell({ matrixIndex }: { matrixIndex: numbe
   const { selectedCell, handleChangeSelectedCell, handleChangeOutputSolution, outputSolution, step, setStep } = useContext<AppContextProps>(AppContext);
   const [targetColor, setTargetColor] = useState<DIGIT | 0>(0);
   const [isFillAll, setIsFillAll] = useState<boolean>(false);
-
+  const INDEX_DIGIT_MAP: Record<number, DIGIT> = {
+    10: "-1",
+    0: 0,
+    1: 1,
+    2: 2,
+    3: 3,
+    4: 4,
+    5: 5,
+    6: 6,
+    7: 7,
+    8: 8,
+    9: 9,
+  };
   const handleClick = (color: DIGIT) => {
     if (selectedCell.mode === "select" && selectedCell.position) {
       const newOutputSolution = cloneDeep(outputSolution);
@@ -54,17 +66,17 @@ export default function EditOutputGridCell({ matrixIndex }: { matrixIndex: numbe
         <Button variant="contained" size="small" sx={{ marginRight: 1 }} onClick={() => handleChangeSelectedCell({ ...selectedCell, mode: "fill", position: undefined })} color={selectedCell.mode === "fill" ? "primary" : "inherit"}>Fill</Button>
       </Box>
       <Box display="flex" flexDirection="row">
-        {Array.from({ length: 10 }, (_, index) => (
-          <Box key={index} marginRight={0.5} onClick={() => handleClick(index as DIGIT)} sx={{ cursor: "pointer", border: selectedCell.color === index ? "2px solid #000000" : "2px solid transparent", borderRadius: 1 }}>
-            <Box width={32} height={32} bgcolor={COLOR_MAP[index as DIGIT]} position="relative" />
+        {Array.from({ length: 11 }, (_, index) => (
+          <Box key={index} marginRight={0.5} onClick={() => handleClick(INDEX_DIGIT_MAP[index])} sx={{ cursor: "pointer", border: selectedCell.color === INDEX_DIGIT_MAP[index] ? "2px solid #000000" : "2px solid transparent", borderRadius: 1 }}>
+            <Box width={32} height={32} bgcolor={COLOR_MAP[INDEX_DIGIT_MAP[index]]} position="relative" />
           </Box>
         ))}
       </Box>
       <Typography  variant="body2">Target Color:</Typography>
       <Box display="flex" flexDirection="row">
-        {Array.from({ length: 10 }, (_, index) => (
-          <Box key={index} marginRight={0.5} onClick={() => setTargetColor(index as DIGIT)} sx={{ cursor: "pointer", border: targetColor === index ? "2px solid #000000" : "2px solid transparent", borderRadius: 1 }}>
-            <Box width={32} height={32} bgcolor={COLOR_MAP[index as DIGIT]} position="relative" sx={{ opacity: 0.6 }} />
+        {Array.from({ length: 11 }, (_, index) => (
+          <Box key={index} marginRight={0.5} onClick={() => setTargetColor(INDEX_DIGIT_MAP[index])} sx={{ cursor: "pointer", border: targetColor === INDEX_DIGIT_MAP[index] ? "2px solid #000000" : "2px solid transparent", borderRadius: 1 }}>
+            <Box width={32} height={32} bgcolor={COLOR_MAP[INDEX_DIGIT_MAP[index]]} position="relative" sx={{ opacity: 0.6 }} />
           </Box>
         ))}
         <Typography variant="body2">/Replace All Colors:</Typography>
