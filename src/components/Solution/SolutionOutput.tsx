@@ -1,8 +1,7 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { AppContext, type AppContextProps } from "../Context/AppContext";
 import { Layer, Rect, Stage } from "react-konva";
 import { COLOR_MAP, DEFAULT_SELECTED_CELL, UNIT, type DIGIT } from "../../const";
-import { type Position } from "../../types/position";
 import { isBetweenPosition } from "../../utils/isBetween";
 import { cloneDeep } from "lodash"
 import { boundaryFill } from "../../utils/boundaryFill";
@@ -13,13 +12,12 @@ import { projectLine } from "../../utils/projectLine";
 
 export default function SolutionOutput({ outputIndex }: { outputIndex: number }) {
 
-  const { startPosition, setStartPosition, currentPosition, setCurrentPosition, endPosition, setEndPosition, outputSolution, selectedCell, handleChangeOutputSolution, handleChangeSelectedCell, inputSolution, step, setStep, choosenTrainingId } = useContext<AppContextProps>(AppContext);
-  const [selectedPos, setSelectedPos] = useState<Position | null>(null);
+  const { selectedPos, setSelectedPos, startPosition, setStartPosition, currentPosition, setCurrentPosition, endPosition, setEndPosition, outputSolution, selectedCell, handleChangeOutputSolution, handleChangeSelectedCell, inputSolution, step, setStep, choosenTrainingId } = useContext<AppContextProps>(AppContext);
   const rows = outputSolution[outputIndex].length;
   const cols = outputSolution[outputIndex][0].length;
 
 
-  const handleOnClick = (i: number, j: number) => {
+  const handleOnClick = (i: number, j: number, outputIndex: number) => {
     // Handle cell click
     setSelectedPos({x: j, y: i, source: 'output', matrixIndex: outputIndex});
     if (selectedCell.mode === "edit") {
@@ -79,7 +77,7 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
     }
     if (isCtrlOrCmd && e.key === 'v' && selectedCell.mode === "select" && selectedPos && selectedPos.matrixIndex === outputIndex && selectedCell.position && selectedCell.isCopied) {
       // Handle paste operation
-      setStartPosition(selectedPos);
+      setStartPosition(cloneDeep(selectedPos));
       const newOutput = cloneDeep(outputSolution);
       const newRows = newOutput[outputIndex].length;
       const newCols = newOutput[outputIndex][0].length;
@@ -133,7 +131,7 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
     // shift+Ctrl+m
     if (e.key === 'm' && selectedCell.mode === "select" && selectedPos && selectedPos.matrixIndex === outputIndex && selectedCell.position && selectedCell.isCopied) {
       // Handle paste operation
-      setStartPosition(selectedPos);
+      setStartPosition(cloneDeep(selectedPos));
       const newOutput = cloneDeep(outputSolution);
       const newRows = newOutput[outputIndex].length;
       const newCols = newOutput[outputIndex][0].length;
@@ -402,7 +400,7 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
       return () => {
         window.removeEventListener('keydown', handleChangeInput);
       };
-  }, [startPosition, endPosition, selectedCell, outputSolution, selectedPos, step]);  
+  }, [startPosition, endPosition, selectedCell, outputSolution, step]);  
   useEffect(() => {
     if (selectedCell.mode !== "select") {
       setCurrentPosition(null);
@@ -433,7 +431,7 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
               fill={COLOR_MAP[cell] || "#000000ff"}
               stroke="#fbfafaff"
               strokeWidth={1}
-              onClick={() => handleOnClick(i, j)}
+              onClick={() => handleOnClick(i, j, outputIndex)}
               onMouseDown={() => { if (selectedCell.mode === "select") {
                 setStartPosition({ x: j, y: i, source: 'output', matrixIndex: outputIndex })
                 setCurrentPosition(null)
