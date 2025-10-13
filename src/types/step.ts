@@ -36,13 +36,27 @@ export type ProjectStep = {
   options: {
     position: Position,
     size: Size,
-    direction: 'up' | 'down' | 'left' | 'right'
+    direction: 'up' | 'down' | 'left' | 'right' | 'north' | 'south' | 'east' | 'west'
   },
   newOutput: Array<Array<Array<DIGIT>>>,
 }
 
+// export type MatchStep = {
+//   action: 'match',
+//   options: {
+//     from: {
+//       position: Position,
+//       size: Size,
+//     },
+//     to: {
+//       position: Position
+//     }
+//   },
+//   newOutput: Array<Array<Array<DIGIT>>>,
+// }
+
 export type CopyStep = {
-  action: 'copy',
+  action: 'copy' | 'match',
   options: {
     from: {
       position: Position,
@@ -66,9 +80,11 @@ export type FillStep = {
   options: {
     position: Position,
     size: Size,
-    color: DIGIT
+    color: DIGIT,
+    targetColor: DIGIT,
+    isFillAll: boolean,
   },
   newOutput: Array<Array<Array<DIGIT>>>,
 }
 
-export type Step = ResizeStep | CopyStep | ClearStep | FillStep | RotateStep | FlipStep | ProjectStep;
+export type Step = ResizeStep | CopyStep | ClearStep | FillStep | RotateStep | FlipStep | ProjectStep; //| MatchStep;

@@ -10,6 +10,8 @@ import type { Position } from "../../types/position";
 
 
 export type AppContextProps = {
+  selectedPos: Position | null,
+  setSelectedPos: (position: Position | null) => void,
   startPosition: Position | null,
   setStartPosition: (position: Position | null) => void,
   currentPosition: Position | null,
@@ -40,6 +42,8 @@ export type AppContextProps = {
 }
 
 export const AppContext = createContext<AppContextProps>({
+  selectedPos: null,
+  setSelectedPos: () => {},
   startPosition: null,
   setStartPosition: () => {},
   currentPosition: null,
@@ -70,6 +74,7 @@ export const AppContext = createContext<AppContextProps>({
 });
 
 export default function AppContextProvider({ children }: PropsWithChildren) {
+  const [selectedPos, setSelectedPos] = useState<Position | null>(null);
   const [startPosition, setStartPosition] = useState<Position | null>(null);
   const [currentPosition, setCurrentPosition] = useState<Position | null>(null);
   const [endPosition, setEndPosition] = useState<Position | null>(null);
@@ -101,7 +106,7 @@ export default function AppContextProvider({ children }: PropsWithChildren) {
   };
 
   return (
-    <AppContext.Provider value={{ trainingData, setTrainingData, listTrainingId, choosenTrainingId, handleChangeChoosenTrainingId, outputSolution, handleChangeOutputSolution, inputSolution, handleChangeInputSolution, selectedCell, handleChangeSelectedCell, trainingSolution, setTrainingSolution, step, setStep, error, setError, isCorrect, setIsCorrect, redoStep, setRedoStep, startPosition, setStartPosition, currentPosition, setCurrentPosition, endPosition, setEndPosition }}>
+    <AppContext.Provider value={{ trainingData, setTrainingData, listTrainingId, choosenTrainingId, handleChangeChoosenTrainingId, outputSolution, handleChangeOutputSolution, inputSolution, handleChangeInputSolution, selectedCell, handleChangeSelectedCell, trainingSolution, setTrainingSolution, step, setStep, error, setError, isCorrect, setIsCorrect, redoStep, setRedoStep, startPosition, setStartPosition, currentPosition, setCurrentPosition, endPosition, setEndPosition, selectedPos, setSelectedPos }}>
       {children}
     </AppContext.Provider>
   );

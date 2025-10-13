@@ -43,3 +43,4 @@ export const DEFAULT_SELECTED_CELL: SelectedCell = {
   color: 0 as DIGIT,
   isCopied: false
 } 
+

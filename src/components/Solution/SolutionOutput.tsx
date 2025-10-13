@@ -1,28 +1,28 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { AppContext, type AppContextProps } from "../Context/AppContext";
 import { Layer, Rect, Stage } from "react-konva";
 import { COLOR_MAP, DEFAULT_SELECTED_CELL, UNIT, type DIGIT } from "../../const";
-import { type Position } from "../../types/position";
 import { isBetweenPosition } from "../../utils/isBetween";
 import { cloneDeep } from "lodash"
 import { boundaryFill } from "../../utils/boundaryFill";
 import { projectRect } from "../../utils/projectRect";
 import type { CopyStep, FillStep, FlipStep, ProjectStep, RotateStep } from "../../types/step";
 import { projectRectForce } from "../../utils/projectRectForce";
+import { projectLine } from "../../utils/projectLine";
 
 export default function SolutionOutput({ outputIndex }: { outputIndex: number }) {
 
-  const { startPosition, setStartPosition, currentPosition, setCurrentPosition, endPosition, setEndPosition, outputSolution, selectedCell, handleChangeOutputSolution, handleChangeSelectedCell, inputSolution, step, setStep, choosenTrainingId } = useContext<AppContextProps>(AppContext);
-  const [selectedPos, setSelectedPos] = useState<Position | null>(null);
+  const { selectedPos, setSelectedPos, startPosition, setStartPosition, currentPosition, setCurrentPosition, endPosition, setEndPosition, outputSolution, selectedCell, handleChangeOutputSolution, handleChangeSelectedCell, inputSolution, step, setStep, choosenTrainingId } = useContext<AppContextProps>(AppContext);
   const rows = outputSolution[outputIndex].length;
   const cols = outputSolution[outputIndex][0].length;
 
 
-  const handleOnClick = (i: number, j: number) => {
+  const handleOnClick = (i: number, j: number, outputIndex: number) => {
     // Handle cell click
     setSelectedPos({x: j, y: i, source: 'output', matrixIndex: outputIndex});
     if (selectedCell.mode === "edit") {
       const newOutputSolution = cloneDeep(outputSolution);
+      const targetColor = newOutputSolution[outputIndex][i][j];
       newOutputSolution[outputIndex][i][j] = selectedCell.color;
       handleChangeOutputSolution(newOutputSolution);
       const newStep: FillStep = {
@@ -30,7 +30,9 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
         options: {
           position: { x: j, y: i, source: 'output', matrixIndex: outputIndex },
           size: {width: 1, height: 1},
-          color: selectedCell.color
+          color: selectedCell.color,
+          targetColor,
+          isFillAll: true,
         },
         newOutput: newOutputSolution
       };
@@ -39,6 +41,7 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
     else if (selectedCell.mode === "fill") {
       const currentColor = outputSolution[outputIndex][i][j];
       const newOutputSolution = cloneDeep(outputSolution);
+      const targetColor = newOutputSolution[outputIndex][i][j];
       boundaryFill(j, i, currentColor, selectedCell.color, newOutputSolution[outputIndex]);
       handleChangeOutputSolution(newOutputSolution);
       const newStep: FillStep = {
@@ -46,7 +49,9 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
         options: {
           position: { x: j, y: i, source: 'output', matrixIndex: outputIndex },
           size: {width: 1, height: 1},
-          color: selectedCell.color
+          color: selectedCell.color,
+          targetColor,
+          isFillAll: false
         },
         newOutput: newOutputSolution
       };
@@ -54,7 +59,7 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
     }
   }
 
-  // Select:Ctrl+c/v=copy/paste, r=rotate, h/v=flip, arrow=project, ctrl+arrow=force project
+  // Select:Ctrl+c/v=copy/paste, r=rotate, h/v=flip, arrow=project (up, down, left, right. rectangle area selected), n=project north, s=project south, e=project east, w=project west (on selected line), ctrl+arrow=force project, m=match
   const handleChangeInput = (e: KeyboardEvent) => {
     // Escape key to cancel selection
     if (e.key === 'Escape' && selectedCell.mode === "select") {
@@ -72,7 +77,7 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
     }
     if (isCtrlOrCmd && e.key === 'v' && selectedCell.mode === "select" && selectedPos && selectedPos.matrixIndex === outputIndex && selectedCell.position && selectedCell.isCopied) {
       // Handle paste operation
-      setStartPosition(selectedPos);
+      setStartPosition(cloneDeep(selectedPos));
       const newOutput = cloneDeep(outputSolution);
       const newRows = newOutput[outputIndex].length;
       const newCols = newOutput[outputIndex][0].length;
@@ -122,6 +127,61 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
       setStep([...step, newStep]);
     }
 
+    // Match the selected area to the destination area
+    // shift+Ctrl+m
+    if (e.key === 'm' && selectedCell.mode === "select" && selectedPos && selectedPos.matrixIndex === outputIndex && selectedCell.position && selectedCell.isCopied) {
+      // Handle paste operation
+      setStartPosition(cloneDeep(selectedPos));
+      const newOutput = cloneDeep(outputSolution);
+      const newRows = newOutput[outputIndex].length;
+      const newCols = newOutput[outputIndex][0].length;
+      const { x, y, source, matrixIndex } = selectedCell.position;
+      const sx = selectedCell.size ? selectedCell.size.width : 1;
+      const sy = selectedCell.size ? selectedCell.size.height : 1;
+
+      if (source === 'input' && inputSolution) {
+        const minDeltaRows = Math.min(sy, newRows - selectedPos.y);
+        const minDeltaCols = Math.min(sx, newCols - selectedPos.x);
+        for (let i = 0; i < minDeltaRows; i++) {
+          for (let j = 0; j < minDeltaCols; j++) {
+            newOutput[outputIndex][selectedPos.y + i][selectedPos.x + j] = (newOutput[outputIndex][selectedPos.y + i][selectedPos.x + j] === inputSolution[matrixIndex][y + i][x + j])? inputSolution[matrixIndex][y + i][x + j] : "-1" as DIGIT;
+          }
+        }
+        // The new selectedCell is now the newly pasted area
+        handleChangeSelectedCell({...selectedCell, position: { x: selectedPos.x, y: selectedPos.y, source: 'output', matrixIndex: outputIndex }, size: { width: minDeltaCols, height: minDeltaRows }, isCopied: false });
+        setEndPosition({ x: selectedPos.x + minDeltaCols - 1, y: selectedPos.y + minDeltaRows - 1, source: 'output', matrixIndex: outputIndex });
+      }
+      else if (source === 'output') {
+        const minDeltaRows = Math.min(sy, newRows - selectedPos.y);
+        const minDeltaCols = Math.min(sx, newCols - selectedPos.x);
+        for (let i = 0; i < minDeltaRows; i++) {
+          for (let j = 0; j < minDeltaCols; j++) {
+            newOutput[outputIndex][selectedPos.y + i][selectedPos.x + j] = (newOutput[outputIndex][selectedPos.y + i][selectedPos.x + j] === outputSolution[matrixIndex][y + i][x + j])? outputSolution[matrixIndex][y + i][x + j] : "-1" as DIGIT;
+          }
+        }
+        // The new selectedCell is now the newly pasted area
+        handleChangeSelectedCell({...selectedCell, position: { x: selectedPos.x, y: selectedPos.y, source: 'output', matrixIndex: outputIndex }, size: { width: minDeltaCols, height: minDeltaRows }, isCopied: false });
+        setEndPosition({ x: selectedPos.x + minDeltaCols - 1, y: selectedPos.y + minDeltaRows - 1, source: 'output', matrixIndex: outputIndex });
+      }
+
+      const newStep: CopyStep = {
+        action: 'match',
+        options: {
+          from: {
+            position: { x, y, source, matrixIndex },
+            size: { width: sx, height: sy },
+          },
+          to: {
+            position: { x: selectedPos.x, y: selectedPos.y, source: 'output', matrixIndex: outputIndex },
+          }
+        },
+        newOutput
+      };
+      handleChangeOutputSolution(newOutput);
+      setStep([...step, newStep]);
+    }
+
+
     if (e.key === 'r' && selectedCell.mode === "select" && selectedCell.position && selectedCell.position.source === 'output' && selectedCell.position.matrixIndex === outputIndex && !selectedCell.isCopied) {
       const { x, y } = selectedCell.position;
       const sx = selectedCell.size?.width || 1;
@@ -163,7 +223,7 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
       const sy = selectedCell.size?.height || 1;
       const newOutput = cloneDeep(outputSolution);
       // Create a temporary matrix to hold the flipped values
-      const tempMatrix = Array.from({ length: sx }, () => Array.from({ length: sy }, () => 0 as DIGIT ));
+      const tempMatrix = Array.from({ length: sy }, () => Array.from({ length: sx }, () => 0 as DIGIT ));
       for (let i = 0; i < sy; i++) {
         for (let j = 0; j < sx; j++) {
           tempMatrix[i][j] = outputSolution[outputIndex][y + i][x + j];
@@ -194,7 +254,7 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
       const sy = selectedCell.size?.height || 1;
       const newOutput = cloneDeep(outputSolution);
       // Create a temporary matrix to hold the flipped values
-      const tempMatrix = Array.from({ length: sx }, () => Array.from({ length: sy }, () => 0 as DIGIT ));
+      const tempMatrix = Array.from({ length: sy }, () => Array.from({ length: sx }, () => 0 as DIGIT ));
       for (let i = 0; i < sy; i++) {
         for (let j = 0; j < sx; j++) {
           tempMatrix[i][j] = outputSolution[outputIndex][y + i][x + j];
@@ -261,6 +321,37 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
         setStep([...step, newStep]);
       }
     }
+    // check if conition
+    // diagonally project the selected line up-right, down-left, up-left, down-right (north, south, east, west)
+    if (['n', 's', 'e', 'w'].includes(e.key) && selectedCell.mode === "select" && selectedCell.position && selectedCell.position.source === 'output' && selectedCell.position.matrixIndex === outputIndex && !selectedCell.isCopied && selectedCell.size && (selectedCell.size.width === 1 || selectedCell.size.height === 1)) {
+      const directionMap: { [key: string]: 'north' | 'south' | 'east' | 'west' } = {
+        'n': 'north',
+        's': 'south',
+        'e': 'east',
+        'w': 'west'
+      };
+      const direction = directionMap[e.key];
+      if (direction) {
+        const { x, y } = selectedCell.position;
+        const sx = selectedCell.size?.width || 1;
+        const sy = selectedCell.size?.height || 1;
+        const newOutput = cloneDeep(outputSolution);
+        // project directly on the matrix
+        projectLine(newOutput[outputIndex], {x, y}, {width: sx, height: sy}, direction);
+        handleChangeOutputSolution(newOutput);
+        const newStep: ProjectStep = {
+          action: 'project',
+          options: {
+            position: { x, y, source: 'output', matrixIndex: outputIndex },
+            size: { width: sx, height: sy },
+            direction
+          },
+          newOutput
+        };
+        setStep([...step, newStep]);
+      }
+    }
+
     // force project the selected area up, down, left, right, using project-pen
     if (isCtrlOrCmd && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key) && selectedCell.mode === "select" && selectedCell.position && !selectedCell.isCopied) {
       const directionMap: { [key: string]: 'up' | 'down' | 'left' | 'right' } = {
@@ -309,7 +400,7 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
       return () => {
         window.removeEventListener('keydown', handleChangeInput);
       };
-  }, [startPosition, endPosition, selectedCell, outputSolution, selectedPos, step]);  
+  }, [startPosition, endPosition, selectedCell, outputSolution, step]);  
   useEffect(() => {
     if (selectedCell.mode !== "select") {
       setCurrentPosition(null);
@@ -340,7 +431,7 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
               fill={COLOR_MAP[cell] || "#000000ff"}
               stroke="#fbfafaff"
               strokeWidth={1}
-              onClick={() => handleOnClick(i, j)}
+              onClick={() => handleOnClick(i, j, outputIndex)}
               onMouseDown={() => { if (selectedCell.mode === "select") {
                 setStartPosition({ x: j, y: i, source: 'output', matrixIndex: outputIndex })
                 setCurrentPosition(null)
@@ -355,7 +446,6 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
                   const sy = Math.abs(startPosition.y - i) + 1;
                   if ((startPosition.x != j || startPosition.y != i) && startPosition.matrixIndex === outputIndex && startPosition.source === 'output') {
                     handleChangeSelectedCell({...selectedCell, position: { x, y, source: 'output', matrixIndex: outputIndex }, size: { width: sx, height: sy }, isCopied: false });
-                    console.log("Selected cell:", {selectedCell});
                   }
               }}}}
               onMouseOver={() => { if (startPosition && !endPosition) setCurrentPosition({ x: j, y: i, source: 'output', matrixIndex: outputIndex }) }}
