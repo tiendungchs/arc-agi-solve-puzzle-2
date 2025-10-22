@@ -12,7 +12,7 @@ import { projectLine } from "../../utils/projectLine";
 
 export default function SolutionOutput({ outputIndex }: { outputIndex: number }) {
 
-  const { selectedPos, setSelectedPos, startPosition, setStartPosition, currentPosition, setCurrentPosition, endPosition, setEndPosition, outputSolution, selectedCell, handleChangeOutputSolution, handleChangeSelectedCell, inputSolution, step, setStep, choosenTrainingId } = useContext<AppContextProps>(AppContext);
+  const { trainingData, selectedPos, setSelectedPos, startPosition, setStartPosition, currentPosition, setCurrentPosition, endPosition, setEndPosition, outputSolution, selectedCell, handleChangeOutputSolution, handleChangeSelectedCell, inputSolution, step, setStep, choosenTrainingId } = useContext<AppContextProps>(AppContext);
   const rows = outputSolution[outputIndex].length;
   const cols = outputSolution[outputIndex][0].length;
 
@@ -109,6 +109,32 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
         handleChangeSelectedCell({...selectedCell, position: { x: selectedPos.x, y: selectedPos.y, source: 'output', matrixIndex: outputIndex }, size: { width: minDeltaCols, height: minDeltaRows }, isCopied: false });
         setEndPosition({ x: selectedPos.x + minDeltaCols - 1, y: selectedPos.y + minDeltaRows - 1, source: 'output', matrixIndex: outputIndex });
       }
+      else if (source === 'example_input') {
+        const examples = trainingData?.[choosenTrainingId!].train || [];
+        const minDeltaRows = Math.min(sy, newRows - selectedPos.y);
+        const minDeltaCols = Math.min(sx, newCols - selectedPos.x);
+        for (let i = 0; i < minDeltaRows; i++) {
+          for (let j = 0; j < minDeltaCols; j++) {
+            newOutput[outputIndex][selectedPos.y + i][selectedPos.x + j] = examples[matrixIndex].input[y + i][x + j];
+          }
+        }
+        // The new selectedCell is now the newly pasted area
+        handleChangeSelectedCell({...selectedCell, position: { x: selectedPos.x, y: selectedPos.y, source: 'output', matrixIndex: outputIndex }, size: { width: minDeltaCols, height: minDeltaRows }, isCopied: false });
+        setEndPosition({ x: selectedPos.x + minDeltaCols - 1, y: selectedPos.y + minDeltaRows - 1, source: 'output', matrixIndex: outputIndex });
+      }
+      else if (source === 'example_output') {
+        const examples = trainingData?.[choosenTrainingId!].train || [];
+        const minDeltaRows = Math.min(sy, newRows - selectedPos.y);
+        const minDeltaCols = Math.min(sx, newCols - selectedPos.x);
+        for (let i = 0; i < minDeltaRows; i++) {
+          for (let j = 0; j < minDeltaCols; j++) {
+            newOutput[outputIndex][selectedPos.y + i][selectedPos.x + j] = examples[matrixIndex].output[y + i][x + j];
+          }
+        }
+        // The new selectedCell is now the newly pasted area
+        handleChangeSelectedCell({...selectedCell, position: { x: selectedPos.x, y: selectedPos.y, source: 'output', matrixIndex: outputIndex }, size: { width: minDeltaCols, height: minDeltaRows }, isCopied: false });
+        setEndPosition({ x: selectedPos.x + minDeltaCols - 1, y: selectedPos.y + minDeltaRows - 1, source: 'output', matrixIndex: outputIndex });
+      }
 
       const newStep: CopyStep = {
         action: 'copy',
@@ -157,6 +183,32 @@ export default function SolutionOutput({ outputIndex }: { outputIndex: number })
         for (let i = 0; i < minDeltaRows; i++) {
           for (let j = 0; j < minDeltaCols; j++) {
             newOutput[outputIndex][selectedPos.y + i][selectedPos.x + j] = (newOutput[outputIndex][selectedPos.y + i][selectedPos.x + j] === outputSolution[matrixIndex][y + i][x + j])? outputSolution[matrixIndex][y + i][x + j] : "-1" as DIGIT;
+          }
+        }
+        // The new selectedCell is now the newly pasted area
+        handleChangeSelectedCell({...selectedCell, position: { x: selectedPos.x, y: selectedPos.y, source: 'output', matrixIndex: outputIndex }, size: { width: minDeltaCols, height: minDeltaRows }, isCopied: false });
+        setEndPosition({ x: selectedPos.x + minDeltaCols - 1, y: selectedPos.y + minDeltaRows - 1, source: 'output', matrixIndex: outputIndex });
+      }
+      else if (source === 'example_input') {
+        const examples = trainingData?.[choosenTrainingId!].train || [];
+        const minDeltaRows = Math.min(sy, newRows - selectedPos.y);
+        const minDeltaCols = Math.min(sx, newCols - selectedPos.x);
+        for (let i = 0; i < minDeltaRows; i++) {
+          for (let j = 0; j < minDeltaCols; j++) {
+            newOutput[outputIndex][selectedPos.y + i][selectedPos.x + j] = (newOutput[outputIndex][selectedPos.y + i][selectedPos.x + j] === examples[matrixIndex].input[y + i][x + j])? examples[matrixIndex].input[y + i][x + j] : "-1" as DIGIT;
+          }
+        }
+        // The new selectedCell is now the newly pasted area
+        handleChangeSelectedCell({...selectedCell, position: { x: selectedPos.x, y: selectedPos.y, source: 'output', matrixIndex: outputIndex }, size: { width: minDeltaCols, height: minDeltaRows }, isCopied: false });
+        setEndPosition({ x: selectedPos.x + minDeltaCols - 1, y: selectedPos.y + minDeltaRows - 1, source: 'output', matrixIndex: outputIndex });
+      }
+      else if (source === 'example_output') {
+        const examples = trainingData?.[choosenTrainingId!].train || [];
+        const minDeltaRows = Math.min(sy, newRows - selectedPos.y);
+        const minDeltaCols = Math.min(sx, newCols - selectedPos.x);
+        for (let i = 0; i < minDeltaRows; i++) {
+          for (let j = 0; j < minDeltaCols; j++) {
+            newOutput[outputIndex][selectedPos.y + i][selectedPos.x + j] = (newOutput[outputIndex][selectedPos.y + i][selectedPos.x + j] === examples[matrixIndex].output[y + i][x + j])? examples[matrixIndex].output[y + i][x + j] : "-1" as DIGIT;
           }
         }
         // The new selectedCell is now the newly pasted area

@@ -69,6 +69,31 @@ export type CopyStep = {
   newOutput: Array<Array<Array<DIGIT>>>,
 }
 
+export type FocusStep = {
+  action: 'focus',
+  options: {
+    position: Position,
+    size: Size,
+  },
+  // newOutput: Array<Array<Array<DIGIT>>>, // no change to output
+}
+
+export type SetCounterStep = {
+  action: 'set-counter',
+  counterIndex: number, // 0 to 2
+  value: number,
+}
+
+export type ScaleStep = {
+  action: 'scale',
+  options: {
+    position: Position,
+    size: Size,
+    factor: number,
+  },
+  newOutput: Array<Array<Array<DIGIT>>>,
+}
+
 export type ClearStep = {
   action: 'clear',
   matrixIndex: number, // 1 to 4
@@ -87,4 +112,4 @@ export type FillStep = {
   newOutput: Array<Array<Array<DIGIT>>>,
 }
 
-export type Step = ResizeStep | CopyStep | ClearStep | FillStep | RotateStep | FlipStep | ProjectStep; //| MatchStep;
+export type Step = ResizeStep | CopyStep | ClearStep | FillStep | RotateStep | FlipStep | ProjectStep | FocusStep | SetCounterStep | ScaleStep; //| MatchStep;
