@@ -11,19 +11,19 @@ export type SolutionInputProps = {
 
 export default function SolutionInput({ input, inputIndex }: SolutionInputProps) {
 
-  const {startPosition, setStartPosition, currentPosition, setCurrentPosition, endPosition, setEndPosition,selectedCell, handleChangeSelectedCell } = useContext<AppContextProps>(AppContext);
+  const {chosenMatrix, setChosenMatrix, startPosition, setStartPosition, currentPosition, setCurrentPosition, endPosition, setEndPosition,selectedCell, handleChangeSelectedCell } = useContext<AppContextProps>(AppContext);
 
   const rows = input.length;
   const cols = input[0].length;
 
   const handleKeydown = (e: KeyboardEvent) => {
     const isCtrlOrCmd = e.ctrlKey || e.metaKey;
-    if (isCtrlOrCmd && e.key === 'c' && startPosition && endPosition && selectedCell.mode === "select" && selectedCell.position?.source === 'input' && selectedCell.position?.matrixIndex === inputIndex) {
+    if (isCtrlOrCmd && e.key === 'c' && startPosition && endPosition && selectedCell.mode === "select" && selectedCell.position?.source === 'input' && chosenMatrix && chosenMatrix.index === inputIndex && chosenMatrix.matrix === 'test') {
       const x = Math.min(startPosition.x, endPosition.x);
       const y = Math.min(startPosition.y, endPosition.y);
       const sx = Math.abs(startPosition.x - endPosition.x) + 1;
       const sy = Math.abs(startPosition.y - endPosition.y) + 1;
-      handleChangeSelectedCell({...selectedCell, position: {x, y, source: 'input', matrixIndex: inputIndex}, size: { width: sx, height: sy }, isCopied: true });
+      handleChangeSelectedCell({...selectedCell, position: {x, y, source: 'input'}, size: { width: sx, height: sy }, isCopied: true });
     }
   }
 
@@ -57,22 +57,23 @@ export default function SolutionInput({ input, inputIndex }: SolutionInputProps)
               stroke="#fbfafaff"
               strokeWidth={1}
               onMouseDown={() => { if (selectedCell.mode === "select") {
-                setStartPosition({ x: j, y: i, source: 'input', matrixIndex: inputIndex })
+                setStartPosition({ x: j, y: i, source: 'input'})
                 setCurrentPosition(null)
                 setEndPosition(null) 
+                setChosenMatrix({matrix: 'test', index: inputIndex})
               }}}
               onMouseUp={() => { if (selectedCell.mode === "select") {
-                setEndPosition({ x: j, y: i, source: 'input', matrixIndex: inputIndex })
-                if (startPosition && startPosition.source === 'input' && startPosition.matrixIndex === inputIndex) {
+                setEndPosition({ x: j, y: i, source: 'input' })
+                if (startPosition && startPosition.source === 'input') {
                   const x = Math.min(startPosition.x, j);
                   const y = Math.min(startPosition.y, i);
                   const sx = Math.abs(startPosition.x - j) + 1;
                   const sy = Math.abs(startPosition.y - i) + 1;
-                  handleChangeSelectedCell({...selectedCell, position: {x, y, source: 'input', matrixIndex: inputIndex}, size: { width: sx, height: sy }, isCopied: false });
+                  handleChangeSelectedCell({...selectedCell, position: {x, y, source: 'input'}, size: { width: sx, height: sy }, isCopied: false });
                 }
               } }}
-              onMouseOver={() => { if (startPosition && !endPosition) setCurrentPosition({ x: j, y: i, source: 'input', matrixIndex: inputIndex }) }}
-              opacity={!selectedCell.isCopied && selectedCell.position?.source === 'input' && startPosition && currentPosition && isBetweenPosition(startPosition, currentPosition, { x: j, y: i, source: 'input', matrixIndex: inputIndex }) ? 0.5 : 1}
+              onMouseOver={() => { if (startPosition && !endPosition) setCurrentPosition({ x: j, y: i, source: 'input'}) }}
+              opacity={chosenMatrix && chosenMatrix.index === inputIndex && chosenMatrix.matrix === 'test' && !selectedCell.isCopied && selectedCell.position?.source === 'input' && startPosition && currentPosition && isBetweenPosition(startPosition, currentPosition, { x: j, y: i, source: 'input' }) ? 0.5 : 1}
             />
           ))
         )}

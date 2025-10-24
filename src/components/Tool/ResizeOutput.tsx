@@ -3,13 +3,13 @@ import { useContext, useState } from "react";
 import { AppContext, type AppContextProps } from "../Context/AppContext";
 import { DEFAULT_SOLUTION_MATRIX, type DIGIT } from "../../const";
 import { cloneDeep } from "lodash";
-import type { ClearStep, CopyStep, ResizeStep } from "../../types/step";
+import { DEFAULT_STEP, type Step } from "../../types/step";
 
 
-export default function ResizeInput({ matrixIndex }: { matrixIndex: number }) {
-  const { outputSolution, handleChangeOutputSolution, inputSolution, setStep, step, redoStep, setRedoStep } = useContext<AppContextProps>(AppContext);
-  const rows = outputSolution[matrixIndex].length;
-  const cols = outputSolution[matrixIndex][0].length;
+export default function ResizeInput() {
+  const { trainingData, choosenTrainingId, chosenMatrix, outputSolution, handleChangeOutputSolution, inputSolution, setStep, step, redoStep, setRedoStep } = useContext<AppContextProps>(AppContext);
+  const rows = outputSolution.length;
+  const cols = outputSolution[0].length;
   const [size, setSize] = useState<string>(`${cols}x${rows}`);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,76 +27,79 @@ export default function ResizeInput({ matrixIndex }: { matrixIndex: number }) {
       setError(null);
     }
 
-    const newOutputMatrix: Array<Array<DIGIT>> = Array.from({ length: newRows }, (_, _i) => Array.from({ length: newCols }, (_, _j) => 0 as DIGIT ));
-    const oldRows = outputSolution[matrixIndex].length;
-    const oldCols = outputSolution[matrixIndex][0].length;
+    const newOutput: Array<Array<DIGIT>> = Array.from({ length: newRows }, (_, _i) => Array.from({ length: newCols }, (_, _j) => 0 as DIGIT ));
+    const oldRows = outputSolution.length;
+    const oldCols = outputSolution[0].length;
 
     const minRows = Math.min(oldRows, newRows);
     const minCols = Math.min(oldCols, newCols);
 
     for (let i = 0; i < minRows; i++) {
       for (let j = 0; j < minCols; j++) {
-        newOutputMatrix[i][j] = outputSolution[matrixIndex][i][j];
+        newOutput[i][j] = outputSolution[i][j];
       }
     }
-    const newOutput = cloneDeep(outputSolution);
-    newOutput[matrixIndex] = newOutputMatrix;
 
     handleChangeOutputSolution(newOutput);
-    const newStep: ResizeStep = {
-      action: 'resize',
-      matrixIndex,
-      options: {
-        size: { width: newCols, height: newRows },
-      },
-      newOutput
-    };
+    const newStep = cloneDeep(DEFAULT_STEP)
+    newStep.action = 'resize';
+    newStep.size = { width: newCols, height: newRows };
+    newStep.newOutput = cloneDeep(newOutput);
     setStep([...step, newStep]);
   }
 
   const handleCopyFromInput = () => {
     // Implement copy from input logic
-    if (inputSolution) {
+    if (chosenMatrix && chosenMatrix.matrix === 'test' && inputSolution) {
+      const matrixIndex = chosenMatrix.index;
       const newRows = inputSolution[matrixIndex].length;
       const newCols = inputSolution[matrixIndex][0].length;
-      const newOutputMatrix1 = Array.from({ length: newRows }, () => Array.from({ length: newCols }, () => 0 as DIGIT )); // create a new empty matrix of size : newRows x newCols
-      const newOutput1 = cloneDeep(outputSolution);
-      newOutput1[matrixIndex] = newOutputMatrix1;
-      //Create a resize step
-      const newStep1: ResizeStep = {
-        action: 'resize',
-        matrixIndex,
-        options: {
-          size: { width: newCols, height: newRows },
-        },
-        newOutput: newOutput1
-      };
+      const newOutputMatrix = Array.from({ length: newRows }, () => Array.from({ length: newCols }, () => 0 as DIGIT )); // create a new empty matrix of size : newRows x newCols
+      // first create a resize step
+      const newStep1: Step = cloneDeep(DEFAULT_STEP);
+      newStep1.action = 'resize';
+      newStep1.size = { width: newCols, height: newRows };
+      newStep1.newOutput = cloneDeep(newOutputMatrix);
 
-      const newOutputMatrix = cloneDeep(inputSolution[matrixIndex]);
-      const newOutput = cloneDeep(outputSolution);
-      newOutput[matrixIndex] = newOutputMatrix;
       // Create a copy step
-      const newStep: CopyStep = {
-        action: 'copy',
-        options: {
-          from: {
-            position: { x: 0, y: 0, source: 'input', matrixIndex },
-            size: { width: newCols, height: newRows },
-          },
-          to: {
-            position: { x: 0, y: 0, source: 'output', matrixIndex }
-          }
-        },
-        newOutput 
-      };
+      const newOutput = cloneDeep(inputSolution[matrixIndex]);
+      const newStep: Step = cloneDeep(DEFAULT_STEP);
+      newStep.action = 'copy';
+      newStep.position = { x: 0, y: 0, source: 'output' };
+      newStep.size = { width: newCols, height: newRows };
+      newStep.fromPosition = { x: 0, y: 0, source: 'input' };
+      newStep.newOutput = newOutput;
       
       // Register both steps in the correct order
       setStep([...step, newStep1, newStep]);
       handleChangeOutputSolution(newOutput);
       setSize(`${newCols}x${newRows}`);
+    } else if (chosenMatrix && chosenMatrix.matrix === 'example' && trainingData && choosenTrainingId) {
+      const matrixIndex = chosenMatrix.index;
+      const examples = trainingData?.[choosenTrainingId!].train ?? [];
+      const newOutput = cloneDeep(examples[matrixIndex].input);
+      const newRows = newOutput.length;
+      const newCols = newOutput[0].length;
+      const newOutputMatrix = Array.from({ length: newRows }, () => Array.from({ length: newCols }, () => 0 as DIGIT )); // create a new empty matrix of size : newRows x newCols
+      // first create a resize step
+      const newStep1: Step = cloneDeep(DEFAULT_STEP);
+      newStep1.action = 'resize';
+      newStep1.size = { width: newCols, height: newRows };
+      newStep1.newOutput = newOutputMatrix;
+
+      // Create a copy step
+      const newStep: Step = cloneDeep(DEFAULT_STEP);
+      newStep.action = 'copy';
+      newStep.fromPosition = { x: 0, y: 0, source: 'input' };
+      newStep.position = { x: 0, y: 0, source: 'output' };
+      newStep.size = { width: newCols, height: newRows };
+      newStep.newOutput = newOutput;
+      // Register both steps in the correct order
+      setStep([...step, newStep1, newStep]);
+      setSize(`${newCols}x${newRows}`);
+      handleChangeOutputSolution(newOutput);
     }
   }
-
 
   const handleUndo = () => {
     // Create a copy to avoid direct mutation
@@ -108,14 +111,14 @@ export default function ResizeInput({ matrixIndex }: { matrixIndex: number }) {
       setRedoStep([popStep, ...redoStep]);
       
       // Update output with the previous state
-      const newOutput = newStep.at(-1)?.newOutput || [DEFAULT_SOLUTION_MATRIX] as Array<Array<Array<DIGIT>>>;
+      const newOutput = newStep.at(-1)?.newOutput || DEFAULT_SOLUTION_MATRIX as Array<Array<DIGIT>>;
       handleChangeOutputSolution(newOutput);
       
       // Update step with the new array (without the popped item)
       setStep(newStep);
     }
     else {
-      const newOutput = cloneDeep([DEFAULT_SOLUTION_MATRIX] as Array<Array<Array<DIGIT>>>);
+      const newOutput = cloneDeep(DEFAULT_SOLUTION_MATRIX as Array<Array<DIGIT>>);
       handleChangeOutputSolution(newOutput);
       setStep([]);
     }
@@ -140,26 +143,26 @@ export default function ResizeInput({ matrixIndex }: { matrixIndex: number }) {
     }
   }
 
-  const handleClear = () => {
-    const newOutputMatrix: Array<Array<DIGIT>> = Array.from({ length: rows }, (_, _i) => Array.from({ length: cols }, (_, _j) => 0 as DIGIT ));
-    const newOutput = cloneDeep(outputSolution);
-    newOutput[matrixIndex] = newOutputMatrix;
-    const newStep: ClearStep = {
-      action: 'clear',
-      matrixIndex,
-      newOutput
-    };
-    setStep([...step, newStep]);
-    handleChangeOutputSolution(newOutput);
-  }
+  // const handleClear = () => {
+  //   const newOutputMatrix: Array<Array<DIGIT>> = Array.from({ length: rows }, (_, _i) => Array.from({ length: cols }, (_, _j) => 0 as DIGIT ));
+  //   const newOutput = cloneDeep(outputSolution);
+  //   newOutput[matrixIndex] = newOutputMatrix;
+  //   const newStep: ClearStep = {
+  //     action: 'clear',
+  //     matrixIndex,
+  //     newOutput
+  //   };
+  //   setStep([...step, newStep]);
+  //   handleChangeOutputSolution(newOutput);
+  // }
 
   const handleReset = () => { // Reset every output matrix, for minor changes, undo/redo is recommended
     // const newOutputSolution = cloneDeep(outputSolution);
     // newOutputSolution[matrixIndex] = cloneDeep(DEFAULT_SOLUTION_MATRIX);
-    const newOutputSolution = Array.from({ length: outputSolution.length || 1 }, () => DEFAULT_SOLUTION_MATRIX);
+    const newOutputSolution = cloneDeep(DEFAULT_SOLUTION_MATRIX as Array<Array<DIGIT>>);
     handleChangeOutputSolution(newOutputSolution);
     setSize('3x3');
-    // setStep([]); //
+    setStep([]);
   }
 
   
@@ -177,7 +180,7 @@ export default function ResizeInput({ matrixIndex }: { matrixIndex: number }) {
         </Box>
         <Box display='flex' flexDirection='row'>
           <Button variant="contained" size="small" sx={{ marginRight: 1 }} onClick={handleCopyFromInput}>Copy from input</Button>
-          <Button variant="contained" size="small" sx={{ marginRight: 1 }} onClick={handleClear}>Clear</Button>
+          {/* <Button variant="contained" size="small" sx={{ marginRight: 1 }} onClick={handleClear}>Clear</Button> */}
           <Button variant="contained" size="small" sx={{ marginRight: 1 }} onClick={handleReset}>Reset</Button>
           <Button variant="contained" size="small" sx={{ marginRight: 1 }} onClick={handleUndo}>Undo</Button>
           <Button variant="contained" size="small" onClick={handleRedo}>Redo</Button>

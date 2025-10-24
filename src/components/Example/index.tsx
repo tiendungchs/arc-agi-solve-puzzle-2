@@ -18,7 +18,7 @@ export default function Example({ examples }: ExampleProps) {
               <ExampleInput input={example.input} exampleIndex={index} />
             </Grid>
             <Grid size={6}>
-              <ExampleOutput output={example.output} exampleIndex={index} />
+              <ExampleOutput output={example.output}/>
             </Grid>
           </Grid>
         </Box>

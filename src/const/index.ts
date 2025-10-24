@@ -2,10 +2,10 @@ import type { SelectedCell } from "../types/selectedCell";
 
 export const UNIT = 12;
 
-export type DIGIT = "-1" | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+export type DIGIT = -1 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
 export const COLOR_MAP: Record<DIGIT, string> = {
-  "-1": "#ffffff",
+  [-1]: "#ffffff", //TODO why cannot -1?
   0: "#000000",
   1: "#1E93FF",
   2: "#F93C31",
@@ -16,10 +16,10 @@ export const COLOR_MAP: Record<DIGIT, string> = {
   7: "#FF851B",
   8: "#87D8F1",
   9: "#921231",
-};
+} as Record<DIGIT, string>;
 
 export const INDEX_MAP: Record<string, DIGIT> = {
-  "#ffffff": "-1",
+  "#ffffff": -1,
   "#000000": 0,
   "#1E93FF": 1,
   "#F93C31": 2,

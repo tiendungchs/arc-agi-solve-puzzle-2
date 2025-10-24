@@ -6,27 +6,35 @@ import type { DIGIT } from "../../const";
 
 
 export default function SubmitSolution() {
-  const { outputSolution, trainingSolution, choosenTrainingId, step, isCorrect, setIsCorrect } = useContext<AppContextProps>(AppContext);
+  const {chosenMatrix, trainingData, outputSolution, trainingSolution, choosenTrainingId, step, isCorrect, setIsCorrect } = useContext<AppContextProps>(AppContext);
   const handleSubmit = () => {
-    if (!choosenTrainingId) {
+    if (!choosenTrainingId || (!trainingData && !trainingSolution) || !chosenMatrix) {
       return;
     }
-    // convert [ Array<Array<DIGIT>> ] to Array<Array<Array<DIGIT>>>
-    const solution = trainingSolution?.[choosenTrainingId] as Array<Array<Array<DIGIT>>>;
-    const isCorrect = Boolean(choosenTrainingId && compareValue(outputSolution, solution));
-    setIsCorrect(isCorrect);
+    if (chosenMatrix.matrix === 'test') { 
+      const matrixIndex = chosenMatrix.index;
+      const solution = trainingSolution?.[choosenTrainingId] as Array<Array<Array<DIGIT>>>;
+      const isCorrect = Boolean(compareValue(outputSolution, solution[matrixIndex]));
+      setIsCorrect(isCorrect);
+    } else {
+      const matrixIndex = chosenMatrix.index;
+      const examples = trainingData?.[choosenTrainingId].train as Array<{ input: Array<Array<DIGIT>>, output: Array<Array<DIGIT>> }>;
+      const solution = examples[matrixIndex].output;
+      const isCorrect = Boolean(compareValue(outputSolution, solution));
+      setIsCorrect(isCorrect);
+    }
   }
 
   const handleDownloadStep = () => {
     const result = {
       id: choosenTrainingId,
       steps: step
-    }
+    };
     const blob = new Blob([JSON.stringify(result, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${choosenTrainingId}_steps.json`;
+    a.download = `${choosenTrainingId}_${chosenMatrix?.matrix}_${chosenMatrix?.index}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -44,13 +52,16 @@ export default function SubmitSolution() {
         </Typography> :
         <Typography variant="body1" color="error.main" marginTop={2}>
           Incorrect Solution!
-        </Typography>)}
-      {isCorrect !== null && (isCorrect === true && <Box marginTop={2}>
-        <Typography variant="h6">4. Steps taken:</Typography>
-        <Button variant="outlined" color="primary" onClick={handleDownloadStep}>
-          Download Steps (check console)
-        </Button>
-      </Box>)}
+        </Typography>
+      )}
+      {isCorrect !== null && (
+        <Box marginTop={2}>
+          <Typography variant="h6">4. Steps taken:</Typography>
+          <Button variant="outlined" color="primary" onClick={handleDownloadStep}>
+            Download Steps (check console)
+          </Button>
+        </Box>
+      )}
     </Box>
   )
 }

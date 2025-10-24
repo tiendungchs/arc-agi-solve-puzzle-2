@@ -3,14 +3,14 @@ import ResizeInput from "./ResizeOutput";
 import EditOutputGridCell from "./EditOutputGridCell";
 
 
-export default function Tool({ matrixIndex }: { matrixIndex: number }) {
+export default function Tool() {
   return (
     <Box>
       <Box marginBottom={2}>
-        <ResizeInput matrixIndex={matrixIndex} />
+        <ResizeInput />
       </Box>
       <Box marginBottom={2}>
-        <EditOutputGridCell matrixIndex={matrixIndex} />
+        <EditOutputGridCell />
       </Box>
     </Box>
   );

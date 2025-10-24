@@ -9,7 +9,7 @@ import { DEFAULT_SELECTED_CELL, DEFAULT_SOLUTION_MATRIX } from './const';
 import { cloneDeep } from 'lodash';
 
 function App() {
-  const { trainingData, setTrainingData, handleChangeChoosenTrainingId, choosenTrainingId, listTrainingId, setTrainingSolution, setStep, setIsCorrect, handleChangeOutputSolution, handleChangeSelectedCell } = useContext<AppContextProps>(AppContext);
+  const { setTrainingData, handleChangeChoosenTrainingId, choosenTrainingId, listTrainingId, setTrainingSolution, setStep, setIsCorrect, handleChangeOutputSolution, handleChangeSelectedCell } = useContext<AppContextProps>(AppContext);
   const handleFileChange = (newFile: File | null) => {
     if (newFile) {
       const reader = new FileReader();
@@ -65,7 +65,7 @@ function App() {
               setStep([]);
               setIsCorrect(null);
               handleChangeSelectedCell(cloneDeep(DEFAULT_SELECTED_CELL));
-              handleChangeOutputSolution(Array.from({ length: newValue ? (trainingData?.[newValue].test.length || 1) : 1 }, () => DEFAULT_SOLUTION_MATRIX));
+              handleChangeOutputSolution(cloneDeep(DEFAULT_SOLUTION_MATRIX));
             }}
             renderInput={(params) => <TextField {...params} label="Select Training ID" />}
           />

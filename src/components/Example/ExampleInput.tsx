@@ -11,19 +11,19 @@ type ExampleInputProps = {
 
 export default function ExampleInput({ input, exampleIndex }: ExampleInputProps) {
 
-  const {startPosition, setStartPosition, currentPosition, setCurrentPosition, endPosition, setEndPosition,selectedCell, handleChangeSelectedCell } = useContext<AppContextProps>(AppContext);
+  const {chosenMatrix, setChosenMatrix, startPosition, setStartPosition, currentPosition, setCurrentPosition, endPosition, setEndPosition,selectedCell, handleChangeSelectedCell } = useContext<AppContextProps>(AppContext);
   
   const rows = input.length;
   const cols = input[0].length;
 
   const handleKeydown = (e: KeyboardEvent) => {
     const isCtrlOrCmd = e.ctrlKey || e.metaKey;
-    if (isCtrlOrCmd && e.key === 'c' && startPosition && endPosition && selectedCell.mode === "select" && selectedCell.position?.source === 'example_input' && selectedCell.position?.matrixIndex === exampleIndex) {
+    if (isCtrlOrCmd && e.key === 'c' && startPosition && endPosition && selectedCell.mode === "select" && selectedCell.position?.source === 'input') {
       const x = Math.min(startPosition.x, endPosition.x);
       const y = Math.min(startPosition.y, endPosition.y);
       const sx = Math.abs(startPosition.x - endPosition.x) + 1;
       const sy = Math.abs(startPosition.y - endPosition.y) + 1;
-      handleChangeSelectedCell({...selectedCell, position: {x, y, source: 'example_input', matrixIndex: exampleIndex}, size: { width: sx, height: sy }, isCopied: true });
+      handleChangeSelectedCell({...selectedCell, position: {x, y, source: 'input'}, size: { width: sx, height: sy }, isCopied: true });
     }
   }
 
@@ -57,22 +57,23 @@ export default function ExampleInput({ input, exampleIndex }: ExampleInputProps)
               stroke="#fbfafaff"
               strokeWidth={1}
               onMouseDown={() => { if (selectedCell.mode === "select") {
-                setStartPosition({ x: colIndex, y: rowIndex, source: 'example_input', matrixIndex: exampleIndex })
+                setStartPosition({ x: colIndex, y: rowIndex, source: 'input'})
                 setCurrentPosition(null)
-                setEndPosition(null) 
+                setEndPosition(null)
+                setChosenMatrix({matrix: 'example', index: exampleIndex})
               }}}
               onMouseUp={() => { if (selectedCell.mode === "select") {
-                setEndPosition({ x: colIndex, y: rowIndex, source: 'example_input', matrixIndex: exampleIndex })
-                if (startPosition && startPosition.source === 'example_input' && startPosition.matrixIndex === exampleIndex) {
+                setEndPosition({ x: colIndex, y: rowIndex, source: 'input'})
+                if (startPosition && startPosition.source === 'input') {
                   const x = Math.min(startPosition.x, colIndex);
                   const y = Math.min(startPosition.y, rowIndex);
                   const sx = Math.abs(startPosition.x - colIndex) + 1;
                   const sy = Math.abs(startPosition.y - rowIndex) + 1;
-                  handleChangeSelectedCell({...selectedCell, position: {x, y, source: 'example_input', matrixIndex: exampleIndex}, size: { width: sx, height: sy }, isCopied: false });
+                  handleChangeSelectedCell({...selectedCell, position: {x, y, source: 'input'}, size: { width: sx, height: sy }, isCopied: false });
                 }
               } }}
-              onMouseOver={() => { if (startPosition && !endPosition) setCurrentPosition({ x: colIndex, y: rowIndex, source: 'example_input', matrixIndex: exampleIndex }) }}
-              opacity={!selectedCell.isCopied && selectedCell.position?.source === 'example_input' && startPosition && currentPosition && isBetweenPosition(startPosition, currentPosition, { x: colIndex, y: rowIndex, source: 'example_input', matrixIndex: exampleIndex }) ? 0.5 : 1}
+              onMouseOver={() => { if (startPosition && !endPosition) setCurrentPosition({ x: colIndex, y: rowIndex, source: 'input'}) }}
+              opacity={selectedCell.mode === "select" && !selectedCell.isCopied && selectedCell.position?.source === 'input' && chosenMatrix?.matrix === 'example' && chosenMatrix.index === exampleIndex && startPosition && currentPosition && isBetweenPosition(startPosition, currentPosition, { x: colIndex, y: rowIndex, source: 'input' }) ? 0.5 : 1}
             />
           ))
         )}

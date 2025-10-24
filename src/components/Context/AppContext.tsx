@@ -6,10 +6,13 @@ import type { TrainingSolutionData } from "../../types/trainingSolutionData";
 import type { Step } from "../../types/step";
 import { cloneDeep } from "lodash"
 import type { Position } from "../../types/position";
+import type { SolutionFor } from "../../types/solutionFor";
 
 
 
 export type AppContextProps = {
+  chosenMatrix: SolutionFor | null,
+  setChosenMatrix: (matrix: SolutionFor | null) => void,
   selectedPos: Position | null,
   setSelectedPos: (position: Position | null) => void,
   startPosition: Position | null,
@@ -33,8 +36,8 @@ export type AppContextProps = {
   listTrainingId: Array<string>,
   choosenTrainingId: string | null,
   handleChangeChoosenTrainingId: (id: string | null) => void,
-  outputSolution: Array<Array<Array<DIGIT>>>,
-  handleChangeOutputSolution: (output: Array<Array<Array<DIGIT>>>) => void,
+  outputSolution: Array<Array<DIGIT>>,
+  handleChangeOutputSolution: (output: Array<Array<DIGIT>>) => void,
   inputSolution?: Array<Array<Array<DIGIT>>>,
   handleChangeInputSolution: (input: Array<Array<Array<DIGIT>>> | undefined) => void,
   selectedCell: SelectedCell,
@@ -42,6 +45,8 @@ export type AppContextProps = {
 }
 
 export const AppContext = createContext<AppContextProps>({
+  chosenMatrix: null,
+  setChosenMatrix: () => {},
   selectedPos: null,
   setSelectedPos: () => {},
   startPosition: null,
@@ -65,7 +70,7 @@ export const AppContext = createContext<AppContextProps>({
   listTrainingId: [],
   choosenTrainingId: null,
   handleChangeChoosenTrainingId: () => {},
-  outputSolution: [cloneDeep(DEFAULT_SOLUTION_MATRIX)],
+  outputSolution: cloneDeep(DEFAULT_SOLUTION_MATRIX),
   handleChangeOutputSolution: () => {},
   inputSolution: undefined,
   handleChangeInputSolution: () => {},
@@ -74,6 +79,7 @@ export const AppContext = createContext<AppContextProps>({
 });
 
 export default function AppContextProvider({ children }: PropsWithChildren) {
+  const [chosenMatrix, setChosenMatrix] = useState<SolutionFor | null>(null);
   const [selectedPos, setSelectedPos] = useState<Position | null>(null);
   const [startPosition, setStartPosition] = useState<Position | null>(null);
   const [currentPosition, setCurrentPosition] = useState<Position | null>(null);
@@ -84,7 +90,7 @@ export default function AppContextProvider({ children }: PropsWithChildren) {
   const [trainingSolution, setTrainingSolution] = useState<TrainingSolutionData | null>(null);
   const [error, setError] = useState<boolean | null>(null);
   const [step, setStep] = useState<Step[]>([]);
-  const [outputSolution, setOutputSolution] = useState<Array<Array<Array<DIGIT>>>>([DEFAULT_SOLUTION_MATRIX]);
+  const [outputSolution, setOutputSolution] = useState<Array<Array<DIGIT>>>(cloneDeep(DEFAULT_SOLUTION_MATRIX));
   const listTrainingId = useMemo(() => Object.keys(trainingData || {}).map(key => key), [trainingData]);
   const [choosenTrainingId, setChoosenTrainingId] = useState<string | null>(null);
   const [inputSolution, setInputSolution] = useState<Array<Array<Array<DIGIT>>> | undefined>(undefined);
@@ -97,7 +103,7 @@ export default function AppContextProvider({ children }: PropsWithChildren) {
     setInputSolution(input);
   };
 
-  const handleChangeOutputSolution = (output: Array<Array<Array<DIGIT>>>) => {
+  const handleChangeOutputSolution = (output: Array<Array<DIGIT>>) => {
     setOutputSolution(output);
   };
 
@@ -106,7 +112,7 @@ export default function AppContextProvider({ children }: PropsWithChildren) {
   };
 
   return (
-    <AppContext.Provider value={{ trainingData, setTrainingData, listTrainingId, choosenTrainingId, handleChangeChoosenTrainingId, outputSolution, handleChangeOutputSolution, inputSolution, handleChangeInputSolution, selectedCell, handleChangeSelectedCell, trainingSolution, setTrainingSolution, step, setStep, error, setError, isCorrect, setIsCorrect, redoStep, setRedoStep, startPosition, setStartPosition, currentPosition, setCurrentPosition, endPosition, setEndPosition, selectedPos, setSelectedPos }}>
+    <AppContext.Provider value={{ trainingData, setTrainingData, listTrainingId, choosenTrainingId, handleChangeChoosenTrainingId, outputSolution, handleChangeOutputSolution, inputSolution, handleChangeInputSolution, selectedCell, handleChangeSelectedCell, trainingSolution, setTrainingSolution, step, setStep, error, setError, isCorrect, setIsCorrect, redoStep, setRedoStep, startPosition, setStartPosition, currentPosition, setCurrentPosition, endPosition, setEndPosition, selectedPos, setSelectedPos, chosenMatrix, setChosenMatrix }}>
       {children}
     </AppContext.Provider>
   );

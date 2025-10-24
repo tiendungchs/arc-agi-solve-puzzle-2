@@ -2,17 +2,17 @@ import { Box, Button, Checkbox, Typography } from "@mui/material";
 import { COLOR_MAP, type DIGIT } from "../../const";
 import { useContext, useState } from "react";
 import { AppContext, type AppContextProps } from "../Context/AppContext";
-import type { FillStep } from "../../types/step";
+import { DEFAULT_STEP, type Step } from "../../types/step";
 import { cloneDeep } from "lodash";
 
 
-export default function EditOutputGridCell({ matrixIndex }: { matrixIndex: number }) {
+export default function EditOutputGridCell() {
 
   const { selectedCell, handleChangeSelectedCell, handleChangeOutputSolution, outputSolution, step, setStep } = useContext<AppContextProps>(AppContext);
   const [targetColor, setTargetColor] = useState<DIGIT | 0>(0);
   const [isFillAll, setIsFillAll] = useState<boolean>(false);
   const INDEX_DIGIT_MAP: Record<number, DIGIT> = {
-    10: "-1",
+    10: -1 as DIGIT,
     0: 0,
     1: 1,
     2: 2,
@@ -25,34 +25,32 @@ export default function EditOutputGridCell({ matrixIndex }: { matrixIndex: numbe
     9: 9,
   };
   const handleClick = (color: DIGIT) => {
-    if (selectedCell.mode === "select" && selectedCell.position) {
+    // fill an area, replace targetColor with color
+    if (selectedCell.mode === "select" && selectedCell.position && selectedCell.position.source === "output") {
       const newOutputSolution = cloneDeep(outputSolution);
-      const { x, y, source } = selectedCell.position;
+      const { x, y } = selectedCell.position;
       const sx = selectedCell.size?.width || 1;
       const sy = selectedCell.size?.height || 1;
-      if (source === "output") {
-        for (let i = x; i < x + sx; i++) {
-          for (let j = y; j < y + sy; j++) {
-            if (newOutputSolution[matrixIndex][j][i] !== targetColor && !isFillAll) {
-              continue;
-            }
-            newOutputSolution[matrixIndex][j][i] = color;
+      for (let i = x; i < x + sx; i++) {
+        for (let j = y; j < y + sy; j++) {
+          if (newOutputSolution[j][i] !== targetColor && !isFillAll) {
+            continue;
           }
+          newOutputSolution[j][i] = color;
         }
-        const newStep: FillStep = {
-          action: 'fill',
-          options: {
-            position: { x, y, source: 'output', matrixIndex },
-            size: {width: sx, height: sy},
-            color,
-            targetColor,
-            isFillAll,
-          },
-          newOutput: newOutputSolution
-        };
-        setStep([...step, newStep]);
-        handleChangeOutputSolution(newOutputSolution);
       }
+      const newStep: Step = cloneDeep(DEFAULT_STEP);
+      newStep.action = 'fill';
+      newStep.color = color;
+      newStep.targetColor = targetColor;
+      newStep.isFillAll = isFillAll;
+      newStep.position = { x, y, source: 'output' };
+      newStep.fromPosition = { x, y, source: 'output' };
+      newStep.size = { width: sx, height: sy };
+      newStep.newOutput = cloneDeep(newOutputSolution);
+
+      setStep([...step, newStep]);
+      handleChangeOutputSolution(newOutputSolution);
     }
     handleChangeSelectedCell({ ...selectedCell, color });
   }
@@ -61,7 +59,6 @@ export default function EditOutputGridCell({ matrixIndex }: { matrixIndex: numbe
     <Box>
       <Typography variant="h6" marginBottom={1}>2. Edit your output grid cells:</Typography>
       <Box display="flex" flexDirection="row" marginBottom={2}>
-        <Button variant="contained" size="small" sx={{ marginRight: 1 }} onClick={() => handleChangeSelectedCell({ ...selectedCell, mode: "focus", position: undefined })} color={selectedCell.mode === "edit" ? "primary" : "inherit"}>Focus</Button>
         <Button variant="contained" size="small" sx={{ marginRight: 1 }} onClick={() => handleChangeSelectedCell({ ...selectedCell, mode: "edit", position: undefined })} color={selectedCell.mode === "edit" ? "primary" : "inherit"}>Edit</Button>
         <Button variant="contained" size="small" sx={{ marginRight: 1 }} onClick={() => handleChangeSelectedCell({ ...selectedCell, mode: "select" })} color={selectedCell.mode === "select" ? "primary" : "inherit"}>Select</Button>
         <Button variant="contained" size="small" sx={{ marginRight: 1 }} onClick={() => handleChangeSelectedCell({ ...selectedCell, mode: "fill", position: undefined })} color={selectedCell.mode === "fill" ? "primary" : "inherit"}>Fill</Button>
