@@ -70,6 +70,8 @@ function App() {
             renderInput={(params) => <TextField {...params} label="Select Training ID" />}
           />
           <Typography variant="h5" gutterBottom>Selected Training ID: {choosenTrainingId}</Typography>
+          <Typography variant="body1" gutterBottom> select: + ctrl+c/v: copy/paste, cmd+m=match, r: rotate, h/v: flip, arrow(up, down, left, right. rectangle area selected): project, line selected + n=north/s=south/e=east/w=west: project diagonal</Typography>
+          <Typography variant="body1" gutterBottom> mode fill + click: fill boundary, mode select + choose color: fill all, mode edit + click: edit 1 pixel</Typography>
           <Layout id={choosenTrainingId} />
         </>}
       </Box>
